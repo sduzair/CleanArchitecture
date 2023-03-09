@@ -60,7 +60,7 @@ The RESTful Api implements authentication and authorization using Access Tokens 
 ### Presentation layer
 
 - Controllers
-  - handle the incoming HTTP requests and return the appropriate HTTP responses and status codes conforming to the specified Contracts.
+  - handle the incoming HTTP requests and return the appropriate HTTP responses and status codes conforming to the specified **Contracts**.
   - Validate the incoming requests.
   - Call Application Layer services to perform the business logic.
   - The responses conform to the **Problem Details** specification.
