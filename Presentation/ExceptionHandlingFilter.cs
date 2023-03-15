@@ -5,20 +5,20 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Presentation;
 /*
- * Filter can be applied on controller or action level using annotation [ExceptionHandlingFilter]
- * Filter can be applied to all controllers using the AddControllers() and passing Action<MvcOptions>
- * Injections are not supported in filters
+ * Filters can be applied on controller or action level using annotation [ExceptionHandlingFilter]
+ * Filters can be applied to all controllers using the AddControllers() and passing Action<MvcOptions>
+ * Injections not done in filters
 */
 internal sealed class ExceptionHandlingFilter : ExceptionFilterAttribute
 {
     public override void OnException(ExceptionContext context)
     {
         if (context.Exception is null) return;
-        // problem details response with stack trace and other details
+        // problem details response with stack trace and other details - (uncomment to use)
         context.Result = new ObjectResult(new ProblemDetails
         {
             Status = (int)HttpStatusCode.InternalServerError,
-            Title = "Internal Server Error",
+            Title = "Internal Server Error asdfj",  //status code is set by ObjectResult
             Detail = context.Exception.Message,
             Instance = context.HttpContext.Request.Path
         })
@@ -26,6 +26,7 @@ internal sealed class ExceptionHandlingFilter : ExceptionFilterAttribute
             ContentTypes = { "application/problem+json", "application/problem+xml" },
         };
 
+        //set ExceptionHandled to true to prevent other filters from handling the exception
         context.ExceptionHandled = true;
     }
 }

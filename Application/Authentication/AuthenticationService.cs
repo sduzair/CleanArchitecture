@@ -60,7 +60,7 @@ internal sealed class AuthenticationService : IAuthenticationService
     {
         if (await _userRepository.GetUserByEmail(email) is not null)
         {
-            throw new Exception("User already exists");
+            throw new UserExistsException();
         }
 
         var user = User.Create(email,

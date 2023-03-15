@@ -19,21 +19,24 @@ internal sealed class Program
             builder.Services.AddInfrastructure(builder.Configuration)
                 .AddApplication()
                 .AddPresentation();
-            builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
             builder.Services.AddProblemDetails();
         }
 
         var app = builder.Build();
 
+        if (!app.Environment.IsDevelopment())
+        {
+            app.UseExceptionHandler("/Error");
+            app.UseHsts();
+        }
+
+
         if (app.Environment.IsDevelopment())
         {
-            app.UseDeveloperExceptionPage();
             app.UseSwagger();
             app.UseSwaggerUI();
         }
 
-        //app.UseExceptionHandler("/Error");
-        app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
         app.UseHttpsRedirection();
         app.MapControllers();
 
