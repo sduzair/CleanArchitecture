@@ -10,7 +10,7 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         //Application services
-        services.AddScoped<Application.Interfaces.IDateTimeProvider, DateTimeProvider>();
+        services.AddScoped<Application.Interfaces.ITimeProvider, UtcClock>();
         services.AddScoped<Application.Authentication.Interfaces.IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<Application.Interfaces.IUserRepository<Domain.Entities.User>, UserRepository>();
         //Local services

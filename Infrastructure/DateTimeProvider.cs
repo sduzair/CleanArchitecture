@@ -1,7 +1,12 @@
 ﻿using Application.Interfaces;
 
 namespace Infrastructure;
-internal sealed class DateTimeProvider : IDateTimeProvider
+
+internal sealed class UtcClock : ITimeProvider
 {
-    public DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
+    /// <summary>
+    /// Returns the current UTC (date)time.
+    /// </summary>
+    /// <returns>Returns the current UTC (date)time.</returns>
+    public DateTimeOffset GetTime() => DateTimeOffset.UtcNow;
 }

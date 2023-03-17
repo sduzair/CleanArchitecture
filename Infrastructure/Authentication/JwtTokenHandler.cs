@@ -12,16 +12,16 @@ namespace Infrastructure.Authentication;
 internal sealed class JwtTokenHandler
 {
     private readonly JwtTokenOptions _jwtTokenOptions;
-    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ITimeProvider _timeProvider;
     //private readonly ILogger<JwtTokenHandler> _logger;
 
     public JwtTokenHandler(
         IOptions<JwtTokenOptions> jwtTokenOptions,
-        IDateTimeProvider dateTimeProvider)
+        ITimeProvider timeProvider)
         //ILogger<JwtTokenHandler> logger)
     {
         _jwtTokenOptions = jwtTokenOptions.Value;   //validated on startup
-        _dateTimeProvider = dateTimeProvider;
+        _timeProvider = timeProvider;
         //_logger = logger;
     }
     public JwtSecurityToken CreateToken(IEnumerable<Claim> claims, DateTimeOffset expiresAt)
@@ -35,7 +35,7 @@ internal sealed class JwtTokenHandler
             _jwtTokenOptions.Issuer,
             _jwtTokenOptions.Audience,
             claims,
-            notBefore: _dateTimeProvider.UtcNow.UtcDateTime,
+            notBefore: _timeProvider.GetTime().UtcDateTime,
             expires: expiresAt.UtcDateTime,
             signingCredentials);
 

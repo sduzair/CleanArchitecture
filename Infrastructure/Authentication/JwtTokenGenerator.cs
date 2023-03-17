@@ -12,26 +12,26 @@ internal sealed class JwtTokenGenerator : IJwtTokenGenerator
     private readonly JwtTokenHandler _jwtTokenHandler;
     //private readonly IJwtTokenValidator _jwtTokenValidator;
     private readonly JwtTokenOptions _jwtTokenOptions;
-    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ITimeProvider _timeProvider;
     //private readonly ILogger<JwtTokenGenerator> _logger;
 
     public JwtTokenGenerator(
         JwtTokenHandler jwtTokenHandler,
         //IJwtTokenValidator jwtTokenValidator,
         IOptions<JwtTokenOptions> jwtTokenOptions,
-        IDateTimeProvider dateTimeProvider)
+        ITimeProvider timeProvider)
         //ILogger<JwtTokenGenerator> logger)
     {
         _jwtTokenHandler = jwtTokenHandler;
         //_jwtTokenValidator = jwtTokenValidator;
         _jwtTokenOptions = jwtTokenOptions.Value;   //validated on startup
-        _dateTimeProvider = dateTimeProvider;
+        _timeProvider = timeProvider;
         //_logger = logger;
     }
 
     public (string accessToken, string expiresAt) GenerateAccessToken(Guid userId, string email, IEnumerable<string> roles)
     {
-        DateTimeOffset now = _dateTimeProvider.UtcNow;
+        DateTimeOffset now = _timeProvider.GetTime();
         DateTimeOffset expiresAt = now.AddMinutes(_jwtTokenOptions.AccessTokenExpirationMinutes);
         var claims = new[]
         {

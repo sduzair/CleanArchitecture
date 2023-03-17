@@ -35,7 +35,9 @@ public sealed class Secret
     public string Reveal() => string.Create(_data.Length, _data, (span, data) => data.Span.CopyTo(span));
 
     [Obsolete($"Use {nameof(Reveal)} instead", error: true)]
+#pragma warning disable CS0809 // Obsolete member overrides non-obsolete member
     public override string? ToString() => base.ToString();
+#pragma warning restore CS0809 // Obsolete member overrides non-obsolete member
 
     /// <summary>
     /// Allow Microsoft.Extensions.Configuration to instantiate the <seealso cref="Secret" />
