@@ -1,5 +1,7 @@
 ﻿using System.Net;
 
+using Application.Authentication;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -14,19 +16,14 @@ internal sealed class ExceptionHandlingFilter : ExceptionFilterAttribute
     public override void OnException(ExceptionContext context)
     {
         if (context.Exception is null) return;
-        // problem details response with stack trace and other details - (uncomment to use)
-        context.Result = new ObjectResult(new ProblemDetails
-        {
-            Status = (int)HttpStatusCode.InternalServerError,
-            Title = "Internal Server Error asdfj",  //status code is set by ObjectResult
-            Detail = context.Exception.Message,
-            Instance = context.HttpContext.Request.Path
-        })
-        {
-            ContentTypes = { "application/problem+json", "application/problem+xml" },
-        };
 
-        //set ExceptionHandled to true to prevent other filters from handling the exception
-        context.ExceptionHandled = true;
+        context.HttpContext.Response.StatusCode = context.Exception switch
+        {
+            UserExistsException => (int)HttpStatusCode.Conflict,//set status code to 409
+            ApplicationException => (int)HttpStatusCode.BadRequest,//set status code to 400
+            KeyNotFoundException => (int)HttpStatusCode.NotFound,//set status code to 404
+            _ => (int)HttpStatusCode.InternalServerError,//set status code to 500
+        };
+        context.ExceptionHandled = false;
     }
 }

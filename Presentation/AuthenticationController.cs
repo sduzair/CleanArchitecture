@@ -1,4 +1,6 @@
 ﻿
+using System.Net;
+
 using Application.Authentication;
 
 using Contracts.Authentication;
@@ -32,7 +34,7 @@ public sealed class AuthenticationController : ControllerBase
             authenticationResult.AccessTokenExpiresAt,
             authenticationResult.RefreshTokenExpiresAt,
             authenticationResult.UserId);
-        
+
         return Ok(authenticationResponse);
     }
 
@@ -88,12 +90,11 @@ public sealed class AuthenticationController : ControllerBase
             registerRequest.ZipCode,
             registerRequest.Country);
 
-        return Created("", new ProblemDetails
-        {
-            Title = "Registration successful",
-            Detail = "Please check your email to confirm your account.",
-            Status = 201
-        });
+        
+        return Problem(
+            statusCode: (int)HttpStatusCode.Created,
+            title: "Registration successful",
+            detail: "Please check your email to confirm your account.");
     }
 
     [HttpPost]
