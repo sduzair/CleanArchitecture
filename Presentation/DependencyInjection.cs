@@ -9,10 +9,12 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddPresentation(this IServiceCollection services)
     {
-        services.AddControllers();
+        services.AddControllers(options => options.RespectBrowserAcceptHeader = true)
+            .AddXmlSerializerFormatters();
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
         services.AddProblemDetails();
+        services.AddTransient<ContentNegotiationMiddleware>();
         return services;
     }
 }
@@ -33,6 +35,7 @@ public static class ApplicationBuilderExtensions
             app.UseSwaggerUI();
         }
 
+        app.UseMiddleware<ContentNegotiationMiddleware>();
         app.UseExceptionHandler("/Error");
         app.UseHttpsRedirection();
         app.UseRouting();
