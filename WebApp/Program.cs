@@ -13,8 +13,7 @@ internal sealed class Program
         {
             builder.Services.AddPresentation()
                 .AddInfrastructure(builder.Configuration)
-                .AddApplication()
-                .AddPresentation();
+                .AddApplication();
         }
 
         var app = builder.Build();

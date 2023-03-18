@@ -19,21 +19,13 @@ public sealed class ErrorController : ControllerBase
     {
         var exceptionHandlerFeature = HttpContext.Features.Get<IExceptionHandlerFeature>()!;
 
-        var problemDetails = new ProblemDetails
+        var (statusCode, message) = exceptionHandlerFeature.Error switch
         {
-            Title = exceptionHandlerFeature.Error.Message,
-            Status = exceptionHandlerFeature.Error switch
-            {
-                UserExistsException _ => (int)HttpStatusCode.Conflict,
-                ApplicationException _ => (int)HttpStatusCode.BadRequest,
-                KeyNotFoundException _ => (int)HttpStatusCode.NotFound,
-                _ => (int?)(int)HttpStatusCode.InternalServerError,
-            }
+            ApplicationException _ => ((int)HttpStatusCode.BadRequest, exceptionHandlerFeature.Error.Message),
+            KeyNotFoundException _ => ((int)HttpStatusCode.NotFound, exceptionHandlerFeature.Error.Message),
+            _ => throw exceptionHandlerFeature.Error,
         };
-        return new ObjectResult(problemDetails)
-        {
-            ContentTypes = { "application/problem+json", "application/problem+xml" },
-            
-        };
+
+        return Problem(statusCode: statusCode, title: message);
     }
 }

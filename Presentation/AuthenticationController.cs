@@ -11,7 +11,7 @@ namespace Presentation;
 
 [ApiController]
 [Route("api/[controller]/[action]")]
-//[ExceptionHandlingFilter]
+[TypeFilter(typeof(AuthenticationExceptionHandlingFilter))]
 public sealed class AuthenticationController : ControllerBase
 {
     private readonly IAuthenticationService _authenticationService;
@@ -90,11 +90,8 @@ public sealed class AuthenticationController : ControllerBase
             registerRequest.ZipCode,
             registerRequest.Country);
 
-        
-        return Problem(
-            statusCode: (int)HttpStatusCode.Created,
-            title: "Registration successful",
-            detail: "Please check your email to confirm your account.");
+
+        return CreatedAtAction(null, null);
     }
 
     [HttpPost]
