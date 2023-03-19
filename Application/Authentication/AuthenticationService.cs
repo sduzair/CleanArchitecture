@@ -1,5 +1,4 @@
 ﻿using Application.Authentication.Interfaces;
-using Application.Interfaces;
 
 using Domain.Entities;
 
@@ -26,10 +25,7 @@ internal sealed class AuthenticationService : IAuthenticationService
 
     public async Task<AuthenticationResult> LoginAsync(string email, string password)
     {
-        if (await _userRepository.GetUserByEmail(email) is not User user)
-        {
-            throw new Exception("error");
-        }
+        User user = await _userRepository.GetUserByEmail(email) ?? throw new Exceptions.UserNotFoundException();
 
         await VerifyPasswordAsync(email, password);
         (string accessToken, string expiresAt) = _jwtTokenGenerator.GenerateAccessToken(user.Id, email, roles: new[] { "user" });
@@ -44,10 +40,11 @@ internal sealed class AuthenticationService : IAuthenticationService
 
     private async Task VerifyPasswordAsync(string email, string password)
     {
-        User? user = await _userRepository.GetUserByEmail(email);
-        if(user is not null && !user.Password.Equals(password))
+        User user = await _userRepository.GetUserByEmail(email) ?? throw new Exceptions.UserNotFoundException();
+
+        if(!user.Password.Equals(password))
         {
-            throw new Exception("Incorrect password");
+            throw new Exceptions.IncorrectPasswordException();
         }
     }
 
@@ -60,7 +57,7 @@ internal sealed class AuthenticationService : IAuthenticationService
     {
         if (await _userRepository.GetUserByEmail(email) is not null)
         {
-            throw new UserExistsException();
+            throw new Exceptions.UserExistsException();
         }
 
         var user = User.Create(email,
