@@ -1,16 +1,14 @@
 ﻿using System.Net;
 
-using Application.Auth.Exceptions;
-
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 
-namespace Presentation.Authentication;
+namespace Presentation.Filters;
 /*
  * Filters can be applied on controller or action level using annotation [AuthExceptionHandlingFilter]
  * Filters can be applied to all controllers using the AddControllers() and passing Action<MvcOptions>
- * Injections not done in filters
+ * Dependency Injections not possible in simple filters
 */
 internal sealed class AuthExceptionHandlingFilter : ExceptionFilterAttribute, IExceptionFilter
 {
@@ -22,10 +20,10 @@ internal sealed class AuthExceptionHandlingFilter : ExceptionFilterAttribute, IE
         _problemDetailsFactory = problemDetailsFactory;
         _exceptionHandlers = new Dictionary<Type, Action<ExceptionContext>>()
         {
-            { typeof(UserExistsException), HandleUserExistsException },
-            { typeof(EmailConfirmationException), HandleEmailConfirmationException },
-            { typeof(UserNotFoundException), HandleUserNotFoundException },
-            { typeof(IncorrectPasswordException), HandleIncorrectPasswordException  }
+            { typeof(Application.Auth.Exceptions.UserExistsException), HandleUserExistsException },
+            { typeof(Application.Auth.Exceptions.EmailConfirmationException), HandleEmailConfirmationException },
+            { typeof(Application.Auth.Exceptions.UserNotFoundException), HandleUserNotFoundException },
+            { typeof(Application.Auth.Exceptions.IncorrectPasswordException), HandleIncorrectPasswordException  }
         };
     }
 

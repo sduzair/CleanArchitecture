@@ -19,7 +19,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Products.Entities.Product", b =>
                 {
-                    b.Property<Guid>("IdValue")
+                    b.Property<Guid>("Value")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
@@ -34,14 +34,14 @@ namespace Infrastructure.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("IdValue");
+                    b.HasKey("Value");
 
                     b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("Infrastructure.Identity.ApplicationRole", b =>
                 {
-                    b.Property<Guid>("IdValue")
+                    b.Property<Guid>("Value")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
@@ -57,7 +57,7 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
-                    b.HasKey("IdValue");
+                    b.HasKey("Value");
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
@@ -68,13 +68,11 @@ namespace Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("7e2187ae-77a5-4e2a-94bb-49f517882178"),
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = new Guid("43047ad3-9f46-4c46-b7a0-7a23015c5a80"),
                             Name = "Visitor",
                             NormalizedName = "VISITOR"
                         });
@@ -82,7 +80,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Infrastructure.Identity.ApplicationUser", b =>
                 {
-                    b.Property<Guid>("IdValue")
+                    b.Property<Guid>("Value")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
@@ -133,7 +131,7 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
-                    b.HasKey("IdValue");
+                    b.HasKey("Value");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -147,7 +145,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
-                    b.Property<int>("IdValue")
+                    b.Property<int>("Value")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
@@ -160,7 +158,7 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("RoleId")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("IdValue");
+                    b.HasKey("Value");
 
                     b.HasIndex("RoleId");
 
@@ -169,7 +167,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
-                    b.Property<int>("IdValue")
+                    b.Property<int>("Value")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
@@ -182,7 +180,7 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("IdValue");
+                    b.HasKey("Value");
 
                     b.HasIndex("UserId");
 

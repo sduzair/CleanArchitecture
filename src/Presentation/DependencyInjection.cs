@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
+using Presentation.Middleware;
+
 namespace Presentation;
 public static class DependencyInjection
 {

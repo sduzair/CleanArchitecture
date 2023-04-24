@@ -1,6 +1,4 @@
-﻿using System.Security.Claims;
-
-using Application.Auth;
+﻿using Application.Auth;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -10,11 +8,8 @@ using Presentation.Contracts.Auth;
 
 namespace Presentation.Authentication;
 
-[ApiController]
-[Route("api/[controller]/[action]")]
-[TypeFilter(typeof(AuthExceptionHandlingFilter))]
 [Authorize]
-public class AuthController : ControllerBase
+public sealed class AuthController : ApiControllerBase
 {
     private readonly IApplicationAuthService _authService;
 
@@ -57,14 +52,14 @@ public class AuthController : ControllerBase
     }
 
     [HttpGet()]
-    public async Task<IActionResult> ConfirmEmail(ConfirmEmailDto confirmEmailDto)
+    public async Task<IActionResult> ConfirmEmail(string token)
     {
-        if (string.IsNullOrEmpty(confirmEmailDto.Token))
+        if (string.IsNullOrEmpty(token))
         {
             return BadRequest("Token is required.");
         }
 
-        var result = await _authService.ConfirmEmailAsync(confirmEmailDto.Token);
+        var result = await _authService.ConfirmEmailAsync(token);
         if (result.Succeeded)
         {
             return Ok(new { Message = "Email verification successful." });

@@ -15,7 +15,7 @@ namespace Infrastructure.Migrations
         {
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
-                columns: new[] { "IdValue", "ConcurrencyStamp", "Name", "NormalizedName" },
+                columns: new[] { "Value", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
                     { new Guid("43047ad3-9f46-4c46-b7a0-7a23015c5a80"), null, "Visitor", "VISITOR" },
@@ -28,12 +28,12 @@ namespace Infrastructure.Migrations
         {
             migrationBuilder.DeleteData(
                 table: "AspNetRoles",
-                keyColumn: "IdValue",
+                keyColumn: "Value",
                 keyValue: new Guid("43047ad3-9f46-4c46-b7a0-7a23015c5a80"));
 
             migrationBuilder.DeleteData(
                 table: "AspNetRoles",
-                keyColumn: "IdValue",
+                keyColumn: "Value",
                 keyValue: new Guid("7e2187ae-77a5-4e2a-94bb-49f517882178"));
         }
     }

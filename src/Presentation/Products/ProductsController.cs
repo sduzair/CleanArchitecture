@@ -1,69 +1,73 @@
-﻿using Application.Products;
+﻿using Application.Products.Commands;
+using Application.Products.Errors;
+using Application.Products.Queries;
 
-using Domain.Products.Entities;
 using Domain.Products.ValueObjects;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-using Presentation.Contracts.Products;
-
 namespace Presentation.Products;
 
-[ApiController]
-[Route("api/[controller]/[action]")]
 [Authorize]
-public class ProductsController : ControllerBase
+public sealed class ProductsController : ApiControllerBase
 {
-    private readonly IProductsService _productsService;
-    public ProductsController(IProductsService productsService)
+    [HttpPost]
+    public async Task<IActionResult> CreateProduct(CreateProductCommand productDto)
     {
-        _productsService = productsService;
+        var result = await Mediator.Send(productDto);
+        if (result.IsFailed)
+        {
+            return BadRequest(result.Errors);
+        }
+        return CreatedAtAction(nameof(GetProduct), new { id = result.Value.ToString() }, result.Value); 
     }
+
     [HttpGet]
     public async Task<IActionResult> GetProducts()
     {
-        var products = await _productsService.GetProducts();
-        return Ok(products);
-    }
-    [HttpPost]
-    public async Task<IActionResult> CreateProduct(CreateProductDto productDto)
-    {
-        var (result, id) = await _productsService.CreateProduct(productDto.Name, productDto.Description, productDto.UnitPrice);
-        if (result == 0)
+        var result = await Mediator.Send(new GetProductsQuery());
+        if (result.IsFailed)
         {
-            return BadRequest();
+            return BadRequest(result.Errors);
         }
-        return CreatedAtAction(nameof(GetProduct), new { id = id.ToString() }, id); 
+        return Ok(result.Value);
     }
+
     [HttpGet]
     public async Task<IActionResult> GetProduct(Guid id)
     {
-        var product = await _productsService.GetProduct(ProductId.Create(id));
-        if (product is null)
+        var result = await Mediator.Send(new GetProductByIdQuery(ProductId.Create(id)));
+        if (result.HasError<ProductNotFoundError>())
         {
-            return NotFound();
+            return BadRequest(result.Errors);
         }
-        return Ok(product);
+        return Ok(result.Value);
     }
-    [HttpPost]
-    public async Task<IActionResult> UpdateProduct(UpdateProductDto updateProductDto)
+
+    [HttpPut]
+    public async Task<IActionResult> UpdateProduct(Guid id, UpdateProductCommand updateProductCommand)
     {
-        var result = await _productsService.UpdateProduct(updateProductDto.Id, updateProductDto.Name, updateProductDto.Description, updateProductDto.UnitPrice);
-        if (result == 0)
+        if (id != updateProductCommand.Id.Value)
         {
             return BadRequest();
         }
-        return Ok();
+        var result = await Mediator.Send(updateProductCommand);
+        if (result.IsFailed)
+        {
+            return BadRequest(result.Errors);
+        }
+        return NoContent();
     }
+
     [HttpDelete]
     public async Task<IActionResult> DeleteProduct(ProductId id)
     {
-        var result = await _productsService.DeleteProduct(id);
-        if (result == 0)
+        var result = await Mediator.Send(new DeleteProductCommand(ProductId.Create(id.Value)));
+        if (result.IsFailed)
         {
-            return BadRequest();
+            return BadRequest(result.Errors);
         }
-        return Ok();
+        return NoContent();
     }
 }

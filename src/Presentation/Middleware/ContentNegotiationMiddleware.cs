@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 
-namespace Presentation;
+namespace Presentation.Middleware;
 
 /*
  * This middleware is used to handle/intercept exceptions in the pipeline

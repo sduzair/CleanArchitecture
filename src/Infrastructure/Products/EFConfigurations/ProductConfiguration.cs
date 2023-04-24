@@ -12,7 +12,7 @@ internal class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id)
             .ValueGeneratedNever()
-            .HasConversion(x => x!.IdValue, x => new ProductId(x));
+            .HasConversion(x => x!.Value, x => new ProductId(x));
         builder.Property(x => x.Name)
             .HasMaxLength(100);
     }

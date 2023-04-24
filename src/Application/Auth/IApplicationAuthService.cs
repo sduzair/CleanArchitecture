@@ -1,7 +1,5 @@
 ﻿using System.Security.Claims;
 
-using FluentResults;
-
 using Microsoft.AspNetCore.Identity;
 
 namespace Application.Auth;
