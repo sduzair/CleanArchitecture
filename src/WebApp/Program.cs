@@ -4,6 +4,7 @@ using Infrastructure;
 
 using Presentation;
 
+//This is the entry point of the application and acts as the Composition Root
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 {

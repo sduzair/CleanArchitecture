@@ -73,7 +73,7 @@ public sealed class SecretTests
         Assert.Equal("Pa$$w0rd", configuration.Password?.Reveal());
     }
 
-    private class SampleOptions
+    private sealed class SampleOptions
     {
         public Secret? Password { get; set; }
     }

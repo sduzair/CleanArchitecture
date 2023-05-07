@@ -19,7 +19,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Products.Entities.Product", b =>
                 {
-                    b.Property<Guid>("Value")
+                    b.Property<Guid>("Id")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
@@ -34,14 +34,14 @@ namespace Infrastructure.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Value");
+                    b.HasKey("Id");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("Infrastructure.Identity.ApplicationRole", b =>
                 {
-                    b.Property<Guid>("Value")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
@@ -57,7 +57,7 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Value");
+                    b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
@@ -68,11 +68,19 @@ namespace Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Name = "Admin",
-                            NormalizedName = "ADMIN"
+                            Id = new Guid("91dc2f4b-795d-59da-bc68-f41e7fe550dd"),
+                            Name = "ProductManager",
+                            NormalizedName = "PRODUCTMANAGER"
                         },
                         new
                         {
+                            Id = new Guid("0cde373e-600c-58f8-9d40-d402b87c7335"),
+                            Name = "ProductAdmin",
+                            NormalizedName = "PRODUCTADMIN"
+                        },
+                        new
+                        {
+                            Id = new Guid("96589fcf-2a32-5037-8475-4032700aef18"),
                             Name = "Visitor",
                             NormalizedName = "VISITOR"
                         });
@@ -80,7 +88,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Infrastructure.Identity.ApplicationUser", b =>
                 {
-                    b.Property<Guid>("Value")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
@@ -131,7 +139,7 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Value");
+                    b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -143,9 +151,24 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("Infrastructure.Identity.ApplicationUserRole", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", (string)null);
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
-                    b.Property<int>("Value")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
@@ -158,7 +181,7 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("RoleId")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Value");
+                    b.HasKey("Id");
 
                     b.HasIndex("RoleId");
 
@@ -167,7 +190,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
-                    b.Property<int>("Value")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
@@ -180,7 +203,7 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Value");
+                    b.HasKey("Id");
 
                     b.HasIndex("UserId");
 
@@ -208,21 +231,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetUserLogins", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("UserId", "RoleId");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("AspNetUserRoles", (string)null);
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -240,6 +248,25 @@ namespace Infrastructure.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("Infrastructure.Identity.ApplicationUserRole", b =>
+                {
+                    b.HasOne("Infrastructure.Identity.ApplicationRole", "ApplicationRole")
+                        .WithMany("ApplicatoinUserRoles")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Infrastructure.Identity.ApplicationUser", "ApplicationUser")
+                        .WithMany("ApplicationUserRoles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationRole");
+
+                    b.Navigation("ApplicationUser");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -269,21 +296,6 @@ namespace Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
-                {
-                    b.HasOne("Infrastructure.Identity.ApplicationRole", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Infrastructure.Identity.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
                     b.HasOne("Infrastructure.Identity.ApplicationUser", null)
@@ -291,6 +303,16 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Infrastructure.Identity.ApplicationRole", b =>
+                {
+                    b.Navigation("ApplicatoinUserRoles");
+                });
+
+            modelBuilder.Entity("Infrastructure.Identity.ApplicationUser", b =>
+                {
+                    b.Navigation("ApplicationUserRoles");
                 });
 #pragma warning restore 612, 618
         }

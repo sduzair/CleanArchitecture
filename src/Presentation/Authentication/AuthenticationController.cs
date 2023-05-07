@@ -1,19 +1,22 @@
-﻿using Application.Auth;
+﻿using System.Security.Claims;
+
+using Application.Auth;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 using Presentation.Contracts.Auth;
+using Presentation.Utility;
 
 namespace Presentation.Authentication;
 
 [Authorize]
 public sealed class AuthController : ApiControllerBase
 {
-    private readonly IApplicationAuthService _authService;
+    private readonly IApplicationAuthenticationService _authService;
 
-    public AuthController(IApplicationAuthService authService)
+    public AuthController(IApplicationAuthenticationService authService)
     {
         _authService = authService;
     }
@@ -22,7 +25,7 @@ public sealed class AuthController : ApiControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> Register(RegisterDto model)
     {
-        var (result, userId) = await _authService.RegisterAsync(model.Email, model.Password, model.ConfirmPassword);
+        var (result, userId) = await _authService.RegisterAsync(model.Email, model.Password, model.ConfirmPassword, model.RoleName);
         if (result.Succeeded)
         {
             return Ok(new { Message = "Registration successful. Please check your email for verification.", UserId = userId });
@@ -35,10 +38,10 @@ public sealed class AuthController : ApiControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> Login(LoginDto model)
     {
-        var (signInResult, email) = await _authService.LoginAsync(model.Email, model.Password, model.RememberMe);
+        var signInResult = await _authService.LoginAsync(model.Email, model.Password, model.RememberMe);
         if (signInResult.Succeeded)
         {
-            return Ok(new { Message = "Login successful.", Email = email});
+            return Ok(new { Message = "Login successful.", model.Email});
         }
 
         return Unauthorized();
@@ -59,7 +62,9 @@ public sealed class AuthController : ApiControllerBase
             return BadRequest("Token is required.");
         }
 
-        var result = await _authService.ConfirmEmailAsync(token);
+        string email = HttpContext!.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)!.Value;
+
+        var result = await _authService.ConfirmEmailAsync(email, token);
         if (result.Succeeded)
         {
             return Ok(new { Message = "Email verification successful." });
@@ -67,29 +72,4 @@ public sealed class AuthController : ApiControllerBase
 
         return BadRequest(result.Errors);
     }
-
-    [HttpPost]
-    public async Task<IActionResult> DeleteUser()
-    {
-        var result = await _authService.DeleteUserAsync(HttpContext.User);
-        if (result.Succeeded)
-        {
-            await _authService.LogoutAsync();
-            return Ok(new { Message = "User deleted successfully." });
-        }
-        return BadRequest(result.Errors);
-    }
-
-    [HttpPost]
-    [AllowAnonymous]
-    public async Task<IActionResult> DeleteUserByEmail(string email)
-    {
-        var result = await _authService.DeleteUserAsync(email);
-        if (result.Succeeded)
-        {
-            return Ok(new { Message = "User deleted successfully." });
-        }
-        return BadRequest(result.Errors);
-    }
-
 }

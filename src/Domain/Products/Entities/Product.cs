@@ -2,7 +2,7 @@
 using Domain.Products.ValueObjects;
 
 namespace Domain.Products.Entities;
-public class Product : AggregateRoot<ProductId, Guid>
+public class Product : AggregateRoot<ProductId>
 {
     public string Name { get; private set; }
     public string Description { get; private set; }

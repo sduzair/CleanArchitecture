@@ -1,4 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
 namespace Infrastructure.Identity;
-public sealed class ApplicationRole : IdentityRole<Guid> { }
+public class ApplicationRole : IdentityRole<Guid>
+{
+    public virtual List<ApplicationUserRole> ApplicatoinUserRoles { get; set; } = new();
+}

@@ -1,13 +1,18 @@
-﻿using Domain.Products.ValueObjects;
+﻿using Application.Common.Security;
+
+using Domain.Products.Errors;
+using Domain.Products.ValueObjects;
 
 using FluentResults;
 
 using MediatR;
 
 namespace Application.Products.Commands;
+
+[ApplicationAuthorize(Policy = ProductAdminPolicy.PolicyName)]
 public record DeleteProductCommand(ProductId Id) : IRequest<Result>;
 
-internal class DeleteProductCommandHandler : IRequestHandler<DeleteProductCommand, Result>
+internal sealed class DeleteProductCommandHandler : IRequestHandler<DeleteProductCommand, Result>
 {
     private readonly IApplicationDbContext _applicationDbContext;
 
@@ -18,10 +23,10 @@ internal class DeleteProductCommandHandler : IRequestHandler<DeleteProductComman
 
     public async Task<Result> Handle(DeleteProductCommand request, CancellationToken cancellationToken)
     {
-        var product = await _applicationDbContext.Products.FindAsync(request.Id);
+        var product = await _applicationDbContext.Products.FindAsync(new object?[] { request.Id }, cancellationToken: cancellationToken);
         if (product is null)
         {
-            return Result.Fail(new Errors.ProductNotFoundError(request.Id));
+            return Result.Fail(new ProductNotFoundError(request.Id));
         }
         _applicationDbContext.Products.Remove(product);
         _ = await _applicationDbContext.SaveChangesAsync(cancellationToken);

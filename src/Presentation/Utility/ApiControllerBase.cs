@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Presentation.Filters;
 
-namespace Presentation;
+namespace Presentation.Utility;
 
 [ApiController]
 [Route("api/[controller]/[action]")]

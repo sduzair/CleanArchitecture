@@ -8,7 +8,6 @@ using Infrastructure.Utilities;
 
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -33,19 +32,41 @@ public static class DependencyInjection
             }
         })
             .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddUserStore<ApplicationUserStore>()
             .AddUserManager<ApplicationUserManager>()
             .AddRoles<ApplicationRole>()
             .AddDefaultTokenProviders();
-            //.AddUserStore<ApplicationUserStore<ApplicationUser, ApplicationRole, ApplicationDbContext, Guid>>()
-            //.AddRoleStore<ApplicationDbContext>()
-        //services.AddAuthorization(ao => ao.AddPolicy("AdminPolicy", ap => ap.RequireRole("Admin")));
+
+        services.AddAuthorization(o =>
+        {
+            o.AddPolicy(ProductAdminPolicy.PolicyName, p =>
+            {
+                p.RequireAuthenticatedUser();
+                p.RequireRole(ProductAdminPolicy.Roles);
+            });
+            o.AddPolicy(ProductManagementPolicy.PolicyName, p =>
+            {
+                p.RequireAuthenticatedUser();
+                p.RequireRole(ProductManagementPolicy.Roles);
+            });
+            o.AddPolicy(ProductViewPolicy.PolicyName, p =>
+            {
+                p.RequireAuthenticatedUser();
+                p.RequireRole(ProductViewPolicy.Roles);
+            });
+        });
+
         //services.ConfigureApplicationCookie(co => co.LoginPath = "/Identity/Account/Login");
 
         //Application services
         services.AddScoped<Application.Common.Interfaces.ITimeProvider, UtcClock>();
+
         services.AddTransient<IEmailSender, MessageSender>();
         services.AddTransient<ISmsSender, MessageSender>();
-        services.AddScoped<IApplicationAuthService, ApplicationAuthService>();
+
+        services.AddScoped<IApplicationAuthenticationService, ApplicationAuthenticationService>();
+        services.AddScoped<IApplicationAuthorizationService, ApplicationAuthorizationService>();
+        services.AddScoped<IApplicationUserService, ApplicationUserService>();
 
         return services;
     }

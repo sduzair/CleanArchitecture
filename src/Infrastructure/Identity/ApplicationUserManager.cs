@@ -10,11 +10,116 @@ using Microsoft.Extensions.Options;
 namespace Infrastructure.Identity;
 internal class ApplicationUserManager : UserManager<ApplicationUser>
 {
-    private readonly UserStore<ApplicationUser, ApplicationRole, ApplicationDbContext, Guid, IdentityUserClaim<Guid>, IdentityUserRole<Guid>, IdentityUserLogin<Guid>, IdentityUserToken<Guid>, IdentityRoleClaim<Guid>> _userStore;
+    private readonly UserStore<ApplicationUser, ApplicationRole, ApplicationDbContext, Guid, IdentityUserClaim<Guid>, ApplicationUserRole, IdentityUserLogin<Guid>, IdentityUserToken<Guid>, IdentityRoleClaim<Guid>> _userStore;
+
+    //protected readonly IServiceProvider _services;
+
     public ApplicationUserManager(IUserStore<ApplicationUser> store, IOptions<IdentityOptions> optionsAccessor, IPasswordHasher<ApplicationUser> passwordHasher, IEnumerable<IUserValidator<ApplicationUser>> userValidators, IEnumerable<IPasswordValidator<ApplicationUser>> passwordValidators, ILookupNormalizer keyNormalizer, IdentityErrorDescriber errors, IServiceProvider services, ILogger<UserManager<ApplicationUser>> logger) : base(store, optionsAccessor, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger)
     {
-        _userStore = (UserStore<ApplicationUser, ApplicationRole, ApplicationDbContext, Guid, IdentityUserClaim<Guid>, IdentityUserRole<Guid>, IdentityUserLogin<Guid>, IdentityUserToken<Guid>, IdentityRoleClaim<Guid>>)store;
+        _userStore = (UserStore<ApplicationUser, ApplicationRole, ApplicationDbContext, Guid, IdentityUserClaim<Guid>, ApplicationUserRole, IdentityUserLogin<Guid>, IdentityUserToken<Guid>, IdentityRoleClaim<Guid>>)store;
+
+        //_services = services;
     }
+
+    public async Task<IdentityResult> CreateAndAddToRoleTransactionAsync(ApplicationUser user, string password, string role)
+    {
+        ThrowIfDisposed();
+        //var passwordStore = GetPasswordStore();
+        if (user == null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+        if (password == null)
+        {
+            throw new ArgumentNullException(nameof(password));
+        }
+        var result = await UpdatePasswordHash(user, password, true).ConfigureAwait(false);
+        if (!result.Succeeded)
+        {
+            return result;
+        }
+        return await CreateAndAddToRoleTransactionAsync(user, role).ConfigureAwait(false);
+    }
+
+    public async Task<IdentityResult> CreateAndAddToRoleTransactionAsync(ApplicationUser user, string role)
+    {
+        //CREATING USER
+        ThrowIfDisposed();
+        await UpdateSecurityStampInternal(user).ConfigureAwait(false);
+        var result = await ValidateUserAsync(user).ConfigureAwait(false);
+        if (!result.Succeeded)
+        {
+            return result;
+        }
+        if (Options.Lockout.AllowedForNewUsers && SupportsUserLockout)
+        {
+            await GetUserLockoutStore().SetLockoutEnabledAsync(user, true, CancellationToken).ConfigureAwait(false);
+        }
+        await UpdateNormalizedUserNameAsync(user).ConfigureAwait(false);
+        await UpdateNormalizedEmailAsync(user).ConfigureAwait(false);
+
+        using var transaction = _userStore.Context.Database.BeginTransaction().GetDbTransaction();
+        //_userStore.AutoSaveChanges = false;
+        try
+        {
+            await _userStore.CreateAsync(user, CancellationToken).ConfigureAwait(false);
+
+            //ADDING TO ROLE
+            var userRoleStore = GetUserRoleStore();
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            var normalizedRole = NormalizeName(role);
+            if (await userRoleStore.IsInRoleAsync(user, normalizedRole, CancellationToken).ConfigureAwait(false))
+            {
+                return UserAlreadyInRoleError(role);
+            }
+            await userRoleStore.AddToRoleAsync(user, normalizedRole, CancellationToken).ConfigureAwait(false);
+            //_userStore.AutoSaveChanges = true;
+            result = await UpdateUserAsync(user).ConfigureAwait(false);
+            transaction.Commit();
+        }
+        catch (Exception)
+        {
+            transaction.Rollback();
+            throw;
+        }
+        return result;
+    }
+
+    //public override async Task<ApplicationUser?> FindByNameAsync(string userName)
+    //{
+    //    ThrowIfDisposed();
+    //    if (userName == null)
+    //    {
+    //        throw new ArgumentNullException(nameof(userName));
+    //    }
+    //    userName = NormalizeName(userName);
+
+    //    var user = await Store.FindByNameAsync(userName, CancellationToken).ConfigureAwait(false);
+
+    //    // Need to potentially check all keys
+    //    if (user == null && Options.Stores.ProtectPersonalData)
+    //    {
+    //        var keyRing = _services.GetService<ILookupProtectorKeyRing>();
+    //        var protector = _services.GetService<ILookupProtector>();
+    //        if (keyRing != null && protector != null)
+    //        {
+    //            foreach (var key in keyRing.GetAllKeyIds())
+    //            {
+    //                var oldKey = protector.Protect(key, userName);
+    //                user = await Store.FindByNameAsync(oldKey, CancellationToken).ConfigureAwait(false);
+    //                if (user != null)
+    //                {
+    //                    return user;
+    //                }
+    //            }
+    //        }
+    //    }
+    //    return user;
+    //}
 
     // LIBRARY CODE STARTS
     internal static class LoggerEventIds
@@ -46,7 +151,7 @@ internal class ApplicationUserManager : UserManager<ApplicationUser>
     }
     private IdentityResult UserAlreadyInRoleError(string role)
     {
-        Logger.LogDebug(LoggerEventIds.UserAlreadyInRole, "User is already in role {role}.", role);
+        Logger.LogDebug(LoggerEventIds.UserAlreadyInRole, "ApplicationUser is already in role {role}.", role);
         return IdentityResult.Failed(ErrorDescriber.UserAlreadyInRole(role));
     }
     private IUserSecurityStampStore<ApplicationUser> GetSecurityStore()
@@ -200,71 +305,4 @@ internal class ApplicationUserManager : UserManager<ApplicationUser>
         return cast;
     }
     //LIBRARY CODE ENDS HERE
-    public async Task<IdentityResult> CreateAndAddToRoleTransactionAsync(ApplicationUser user, string password, string role)
-    {
-        ThrowIfDisposed();
-        //var passwordStore = GetPasswordStore();
-        if (user == null)
-        {
-            throw new ArgumentNullException(nameof(user));
-        }
-        if (password == null)
-        {
-            throw new ArgumentNullException(nameof(password));
-        }
-        var result = await UpdatePasswordHash(user, password, true).ConfigureAwait(false);
-        if (!result.Succeeded)
-        {
-            return result;
-        }
-        return await CreateAndAddToRoleTransactionAsync(user, role).ConfigureAwait(false);
-    }
-
-    public async Task<IdentityResult> CreateAndAddToRoleTransactionAsync(ApplicationUser user, string role)
-    {
-        //CREATING USER
-        ThrowIfDisposed();
-        await UpdateSecurityStampInternal(user).ConfigureAwait(false);
-        var result = await ValidateUserAsync(user).ConfigureAwait(false);
-        if (!result.Succeeded)
-        {
-            return result;
-        }
-        if (Options.Lockout.AllowedForNewUsers && SupportsUserLockout)
-        {
-            await GetUserLockoutStore().SetLockoutEnabledAsync(user, true, CancellationToken).ConfigureAwait(false);
-        }
-        await UpdateNormalizedUserNameAsync(user).ConfigureAwait(false);
-        await UpdateNormalizedEmailAsync(user).ConfigureAwait(false);
-
-        using var transaction = _userStore.Context.Database.BeginTransaction().GetDbTransaction();
-        //_userStore.AutoSaveChanges = false;
-        try
-        {
-            await _userStore.CreateAsync(user, CancellationToken).ConfigureAwait(false);
-
-            //ADDING TO ROLE
-            var userRoleStore = GetUserRoleStore();
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
-
-            var normalizedRole = NormalizeName(role);
-            if (await userRoleStore.IsInRoleAsync(user, normalizedRole, CancellationToken).ConfigureAwait(false))
-            {
-                return UserAlreadyInRoleError(role);
-            }
-            await userRoleStore.AddToRoleAsync(user, normalizedRole, CancellationToken).ConfigureAwait(false);
-            //_userStore.AutoSaveChanges = true;
-            result = await UpdateUserAsync(user).ConfigureAwait(false);
-            transaction.Commit();
-        }
-        catch (Exception)
-        {
-            transaction.Rollback();
-            throw;
-        }
-        return result;
-    }
 }

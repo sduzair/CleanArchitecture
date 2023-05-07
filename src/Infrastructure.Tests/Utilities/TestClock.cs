@@ -10,7 +10,7 @@ namespace Infrastructure.Tests.Utilities;
 /// the <see cref="Tick"/> method for convenience.
 /// </summary>
 /// <threadsafety static="true" instance="true"/>
-internal class TestClock : ITimeProvider
+internal sealed class TestClock : ITimeProvider
 {
     private DateTimeOffset _datetime;
     private readonly TimeSpan _increment;

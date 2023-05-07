@@ -2,7 +2,8 @@
 public record RegisterDto(
     string Email,
     string Password,
-    string ConfirmPassword);
+    string ConfirmPassword,
+    string RoleName);
 //string? FirstName,
 //string? LastName,
 //string? PhoneNumber,

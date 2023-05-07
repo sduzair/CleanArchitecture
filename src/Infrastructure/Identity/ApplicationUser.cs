@@ -13,4 +13,7 @@ public class ApplicationUser : IdentityUser<Guid>
         Email = userName;
         UserName = userName;
     }
+    //private readonly List<IdentityUserRole<Guid>> _userRoles = new();
+    //public virtual IReadOnlyList<IdentityUserRole<Guid>> ApplicatoinUserRoles => _userRoles.AsReadOnly();
+    public virtual List<ApplicationUserRole> ApplicationUserRoles { get; set; } = new();
 }

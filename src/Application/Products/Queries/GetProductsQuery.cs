@@ -1,13 +1,19 @@
-﻿using FluentResults;
+﻿using Application.Common.Security;
+
+using Domain.Products.Entities;
+
+using FluentResults;
 
 using MediatR;
 
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Products.Queries;
-public record class GetProductsQuery : IRequest<Result<IEnumerable<ProductDto>>>;
 
-internal class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, Result<IEnumerable<ProductDto>>>
+[ApplicationAuthorize(Policy = ProductViewPolicy.PolicyName)]
+public record class GetProductsQuery : IRequest<Result<IEnumerable<Product>>>;
+
+internal sealed class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, Result<IEnumerable<Product>>>
 
 {
     private readonly IApplicationDbContext _applicationDbContext;
@@ -15,9 +21,9 @@ internal class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, Resul
     {
         _applicationDbContext = context;
     }
-    public async Task<Result<IEnumerable<ProductDto>>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<IEnumerable<Product>>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
     {
-        var products = await _applicationDbContext.Products.ToListAsync(cancellationToken);
-        return Result.Ok(products.Select(product => new ProductDto(product.Id!.Value, product.Name, product.Description, product.Price)));
+        List<Product> products = await _applicationDbContext.Products.ToListAsync(cancellationToken);
+        return products;
     }
 }
