@@ -1,17 +1,28 @@
 ﻿using Application.Products.Commands;
-using Application.Products.Errors;
 using Application.Products.Queries;
 
 using Domain.Products.ValueObjects;
 
+using FluentResults.Extensions;
+using FluentResults.Extensions.AspNetCore;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
+using Presentation.Utility;
 
 namespace Presentation.Products;
 
 [Authorize]
 public sealed class ProductsController : ApiControllerBase
 {
+    private readonly ApplicationAspNetCoreResultEndpointProfile _resultProfile;
+
+    public ProductsController(ApplicationAspNetCoreResultEndpointProfile resultProfile)
+    {
+        _resultProfile = resultProfile;
+    }
+
     [HttpPost]
     public async Task<IActionResult> CreateProduct(CreateProductCommand productDto)
     {
@@ -20,54 +31,42 @@ public sealed class ProductsController : ApiControllerBase
         {
             return BadRequest(result.Errors);
         }
-        return CreatedAtAction(nameof(GetProduct), new { id = result.Value.ToString() }, result.Value); 
+        return CreatedAtAction(nameof(GetProductById), new { id = result.Value.ToString() }, result.Value); 
     }
 
     [HttpGet]
     public async Task<IActionResult> GetProducts()
     {
-        var result = await Mediator.Send(new GetProductsQuery());
-        if (result.IsFailed)
-        {
-            return BadRequest(result.Errors);
-        }
-        return Ok(result.Value);
+        return await Mediator.Send(new GetProductsQuery())
+            .Map((products) => products.Select(ProductDto.MapFrom))
+            .ToActionResult(_resultProfile);
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetProduct(Guid id)
+    public async Task<IActionResult> GetProductById(Guid id)
     {
-        var result = await Mediator.Send(new GetProductByIdQuery(ProductId.Create(id)));
-        if (result.HasError<ProductNotFoundError>())
-        {
-            return BadRequest(result.Errors);
-        }
-        return Ok(result.Value);
+        return await Mediator.Send(new GetProductByIdQuery(ProductId.Create(id)))
+            .Map(ProductDto.MapFrom)
+            .ToActionResult(_resultProfile);
     }
 
     [HttpPut]
-    public async Task<IActionResult> UpdateProduct(Guid id, UpdateProductCommand updateProductCommand)
+    public async Task<IActionResult> UpdateProduct(Guid id, ProductDto productDto)
     {
-        if (id != updateProductCommand.Id.Value)
+        if (id != productDto.Id)
         {
-            return BadRequest();
+            ModelState.AddModelError(nameof(productDto.Id), "Id in payload must match with the Id in Url parameter");
+            return ValidationProblem();
         }
-        var result = await Mediator.Send(updateProductCommand);
-        if (result.IsFailed)
-        {
-            return BadRequest(result.Errors);
-        }
-        return NoContent();
+
+        return await Mediator.Send(productDto.MapToUpdateProductCommand())
+            .ToActionResult(_resultProfile);
     }
 
     [HttpDelete]
-    public async Task<IActionResult> DeleteProduct(ProductId id)
+    public async Task<IActionResult> DeleteProduct(Guid id)
     {
-        var result = await Mediator.Send(new DeleteProductCommand(ProductId.Create(id.Value)));
-        if (result.IsFailed)
-        {
-            return BadRequest(result.Errors);
-        }
-        return NoContent();
+        return await Mediator.Send(new DeleteProductCommand(ProductId.Create(id)))
+            .ToActionResult(_resultProfile);
     }
 }
