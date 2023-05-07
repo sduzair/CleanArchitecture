@@ -5,6 +5,8 @@ using Domain.Products.ValueObjects;
 
 using FluentResults;
 
+using FluentValidation;
+
 using MediatR;
 
 namespace Application.Products.Commands;
@@ -32,5 +34,16 @@ internal sealed class UpdateProductCommandHandler : IRequestHandler<UpdateProduc
         //add entries changed to meta data
 
         return Result.Ok();
+    }
+}
+
+public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProductCommand>
+{
+    public UpdateProductCommandValidator()
+    {
+        RuleFor(v => v.Id.Value).NotEmpty();
+        RuleFor(v => v.Name).NotEmpty().MaximumLength(200);
+        RuleFor(v => v.Description).NotEmpty().MaximumLength(2000);
+        RuleFor(v => v.UnitPrice).NotEmpty().GreaterThan(0);
     }
 }

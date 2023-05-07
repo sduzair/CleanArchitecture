@@ -29,7 +29,7 @@ public sealed class ProductsController : ApiControllerBase
         var result = await Mediator.Send(productDto);
         if (result.IsFailed)
         {
-            return BadRequest(result.Errors);
+            return result.ToActionResult(_resultProfile);
         }
         return CreatedAtAction(nameof(GetProductById), new { id = result.Value.ToString() }, result.Value); 
     }

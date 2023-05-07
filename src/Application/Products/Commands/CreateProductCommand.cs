@@ -4,6 +4,8 @@ using Domain.Products.Entities;
 
 using FluentResults;
 
+using FluentValidation;
+
 using MediatR;
 
 namespace Application.Products.Commands;
@@ -24,10 +26,18 @@ internal sealed class CreateProductCommandHandler : IRequestHandler<CreateProduc
     {
         var product = Product.Create(request.Name, request.Description, request.UnitPrice);
         _applicationDbContext.Products.Add(product);
-        int entries = await _applicationDbContext.SaveChangesAsync(cancellationToken);
-
-        //add entries changed to meta data
+        _ = await _applicationDbContext.SaveChangesAsync(cancellationToken);
 
         return product.Id!.Value;
+    }
+}
+
+public sealed class CreateProductCommandValidator : AbstractValidator<CreateProductCommand>
+{
+    public CreateProductCommandValidator()
+    {
+        RuleFor(v => v.Name).NotEmpty().MaximumLength(200);
+        RuleFor(v => v.Description).NotEmpty().MaximumLength(2000);
+        RuleFor(v => v.UnitPrice).NotEmpty().GreaterThan(0);
     }
 }

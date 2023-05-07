@@ -3,8 +3,7 @@
 using FluentResults;
 
 namespace Domain.Common.ErrorTypes;
-public interface IProblemDetailsError : IReason
+public interface IProblemDetailsError : IError, IStatusCode
 {
-    int StatusCode { get; init; }
     string Title { get; init; }
 }
