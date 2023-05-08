@@ -17,7 +17,13 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IWebHostEnvironment env)
     {
-        services.AddDbContext<ApplicationDbContext>();
+        services.AddDbContext<ApplicationDbContext>(o =>
+        {
+            if (env.IsDevelopment())
+            {
+                o.EnableSensitiveDataLogging(true);
+            }
+        });
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
 
         services.AddIdentity<ApplicationUser, ApplicationRole>(sa =>
@@ -35,6 +41,7 @@ public static class DependencyInjection
             .AddUserStore<ApplicationUserStore>()
             .AddUserManager<ApplicationUserManager>()
             .AddRoles<ApplicationRole>()
+            .AddRoleManager<ApplicationRoleManager>()
             .AddDefaultTokenProviders();
 
         services.AddAuthorization(o =>

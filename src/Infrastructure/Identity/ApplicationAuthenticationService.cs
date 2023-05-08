@@ -52,26 +52,27 @@ internal class ApplicationAuthenticationService : IApplicationAuthenticationServ
     public async Task<SignInResult> LoginAsync(string email, string password, bool isPersistent = true, bool lockoutOnFailure = false)
     {
 
-        //SignInResult result = await _signInManager.PasswordSignInAsync(email, password, isPersistent, lockoutOnFailure: false);
+        SignInResult result = await _signInManager.PasswordSignInAsync(email, password, isPersistent, lockoutOnFailure: false);
+        return result;
 
-        var user = await _userManager.FindByNameAsync(email);
-        if (user == null)
-        {
-            return SignInResult.Failed;
-        }
+        //var user = await _userManager.FindByNameAsync(email);
+        //if (user == null)
+        //{
+        //    return SignInResult.Failed;
+        //}
 
-        var attempt = await _signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure);
+        //var attempt = await _signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure);
 
-        if (attempt.Succeeded)
-        {
-            IEnumerable<Claim> roles = user.ApplicationUserRoles.Select(r => new Claim(ClaimTypes.Role, r.ApplicationRole.Name!));
-            await _signInManager.SignInWithClaimsAsync(user, isPersistent: isPersistent, roles);
-            return SignInResult.Success;
-        }
-        else
-        {
-            return attempt;
-        }
+        //if (attempt.Succeeded)
+        //{
+        //    IEnumerable<Claim> roles = user.ApplicationUserRoles.Select(r => new Claim(ClaimTypes.Role, r.ApplicationRole.Name!));
+        //    await _signInManager.SignInWithClaimsAsync(user, isPersistent: isPersistent, roles);
+        //    return SignInResult.Success;
+        //}
+        //else
+        //{
+        //    return attempt;
+        //}
     }
 
     public async Task LogoutAsync()

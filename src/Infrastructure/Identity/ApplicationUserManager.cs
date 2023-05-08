@@ -89,37 +89,8 @@ internal class ApplicationUserManager : UserManager<ApplicationUser>
         return result;
     }
 
-    //public override async Task<ApplicationUser?> FindByNameAsync(string userName)
-    //{
-    //    ThrowIfDisposed();
-    //    if (userName == null)
-    //    {
-    //        throw new ArgumentNullException(nameof(userName));
-    //    }
-    //    userName = NormalizeName(userName);
-
-    //    var user = await Store.FindByNameAsync(userName, CancellationToken).ConfigureAwait(false);
-
-    //    // Need to potentially check all keys
-    //    if (user == null && Options.Stores.ProtectPersonalData)
-    //    {
-    //        var keyRing = _services.GetService<ILookupProtectorKeyRing>();
-    //        var protector = _services.GetService<ILookupProtector>();
-    //        if (keyRing != null && protector != null)
-    //        {
-    //            foreach (var key in keyRing.GetAllKeyIds())
-    //            {
-    //                var oldKey = protector.Protect(key, userName);
-    //                user = await Store.FindByNameAsync(oldKey, CancellationToken).ConfigureAwait(false);
-    //                if (user != null)
-    //                {
-    //                    return user;
-    //                }
-    //            }
-    //        }
-    //    }
-    //    return user;
-    //}
+    //To reduce queries to database made by UserClaimsPrincipalFactory
+    public override bool SupportsUserClaim => false;
 
     // LIBRARY CODE STARTS
     internal static class LoggerEventIds
