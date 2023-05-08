@@ -7,23 +7,26 @@ using FluentValidation.Results;
 
 using MediatR;
 
-using Microsoft.AspNetCore.Http;
-
 namespace Application.Common.Behaviours;
 
 internal class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
     where TResponse : ResultBase, new()
 {
-    private readonly IValidator<TRequest> _validator;
+    private readonly IValidator<TRequest>? _validator;
 
-    public ValidationBehaviour(IValidator<TRequest> validators)
+    public ValidationBehaviour(IValidator<TRequest>? validator = null)
     {
-        _validator = validators;
+        _validator = validator;
     }
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
+        if (_validator == null)
+        {
+            return await next();
+        }
+
         var context = new ValidationContext<TRequest>(request);
 
         ValidationResult validationResult = await _validator.ValidateAsync(context, cancellationToken);
