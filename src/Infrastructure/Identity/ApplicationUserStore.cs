@@ -27,4 +27,14 @@ internal class ApplicationUserStore : UserStore<ApplicationUser, ApplicationRole
         ThrowIfDisposed();
         return Task.FromResult<IList<string>>(user.ApplicationUserRoles.Select(r => r.ApplicationRole.Name!).ToList());
     }
+
+    public override Task<ApplicationUser?> FindByIdAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ThrowIfDisposed();
+        var id = ConvertIdFromString(userId);
+        return Users.Include(u => u.ApplicationUserRoles)
+            .ThenInclude(r => r.ApplicationRole)
+            .FirstOrDefaultAsync(u => u.Id == Guid.Parse(userId), cancellationToken);
+    }
 }

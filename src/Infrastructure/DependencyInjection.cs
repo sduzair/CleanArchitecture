@@ -1,6 +1,7 @@
 ﻿using Application;
 using Application.Auth;
 using Application.Products;
+using Application.UserManager;
 
 using Infrastructure.Common;
 using Infrastructure.Identity;
@@ -26,15 +27,15 @@ public static class DependencyInjection
         });
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
 
-        services.AddIdentity<ApplicationUser, ApplicationRole>(sa =>
+        services.AddIdentity<ApplicationUser, ApplicationRole>(o =>
         {
             if (env.IsDevelopment())
             {
-                sa.Password.RequireNonAlphanumeric = false;
-                sa.Password.RequiredLength = 0;
-                sa.Password.RequireUppercase = false;
-                sa.Password.RequireLowercase = false;
-                sa.Password.RequireDigit = false;
+                o.Password.RequireNonAlphanumeric = false;
+                o.Password.RequiredLength = 0;
+                o.Password.RequireUppercase = false;
+                o.Password.RequireLowercase = false;
+                o.Password.RequireDigit = false;
             }
         })
             .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -43,6 +44,9 @@ public static class DependencyInjection
             .AddRoles<ApplicationRole>()
             .AddRoleManager<ApplicationRoleManager>()
             .AddDefaultTokenProviders();
+
+        //validates security stamp and replaces principle with updated claims every 5 min
+        services.Configure<SecurityStampValidatorOptions>(o => o.ValidationInterval = env.IsDevelopment() ? TimeSpan.FromSeconds(1) : TimeSpan.FromMinutes(5));
 
         services.AddAuthorization(o =>
         {

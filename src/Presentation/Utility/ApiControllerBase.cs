@@ -3,13 +3,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
-using Presentation.Filters;
+using Presentation.Authentication;
 
 namespace Presentation.Utility;
 
 [ApiController]
 [Route("api/[controller]/[action]")]
-[TypeFilter(typeof(AuthExceptionHandlingFilter))]
+[TypeFilter(typeof(ExceptionsFilter))]
 public class ApiControllerBase : ControllerBase
 {
     private ISender? _meditor;

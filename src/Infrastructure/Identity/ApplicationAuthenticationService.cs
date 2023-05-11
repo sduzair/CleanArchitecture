@@ -11,12 +11,14 @@ internal class ApplicationAuthenticationService : IApplicationAuthenticationServ
 {
     private readonly ApplicationUserManager _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly IdentityErrorDescriber _errorDescriber;
     //private readonly IEmailSender _emailSender;
 
-    public ApplicationAuthenticationService(ApplicationUserManager userManager, SignInManager<ApplicationUser> signInManager)
+    public ApplicationAuthenticationService(ApplicationUserManager userManager, SignInManager<ApplicationUser> signInManager, IdentityErrorDescriber errorDescriber)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _errorDescriber = errorDescriber;
         //_emailSender = emailService;
     }
 
@@ -24,9 +26,11 @@ internal class ApplicationAuthenticationService : IApplicationAuthenticationServ
     {
         if (password != confirmPassword)
         {
-            return (IdentityResult.Failed(new IdentityError { Description = "Passwords do not match" }), null);
+            return (IdentityResult.Failed(_errorDescriber.PasswordMismatch()), null);
         }
         var user = new ApplicationUser(email);
+
+        //creates and adds user to role in a transaction
         var result = await _userManager.CreateAndAddToRoleTransactionAsync(user, password, roleName);
         //if (result.Succeeded)
         //{
@@ -43,7 +47,7 @@ internal class ApplicationAuthenticationService : IApplicationAuthenticationServ
         var user = await _userManager.FindByEmailAsync(email);
         if (user == null)
         {
-            return IdentityResult.Failed(new IdentityError { Description = "ApplicationUser not found" });
+            return IdentityResult.Failed(_errorDescriber.DefaultError());
         }
         var result = await _userManager.ConfirmEmailAsync(user, token);
         return result;
@@ -55,24 +59,6 @@ internal class ApplicationAuthenticationService : IApplicationAuthenticationServ
         SignInResult result = await _signInManager.PasswordSignInAsync(email, password, isPersistent, lockoutOnFailure: false);
         return result;
 
-        //var user = await _userManager.FindByNameAsync(email);
-        //if (user == null)
-        //{
-        //    return SignInResult.Failed;
-        //}
-
-        //var attempt = await _signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure);
-
-        //if (attempt.Succeeded)
-        //{
-        //    IEnumerable<Claim> roles = user.ApplicationUserRoles.Select(r => new Claim(ClaimTypes.Role, r.ApplicationRole.Name!));
-        //    await _signInManager.SignInWithClaimsAsync(user, isPersistent: isPersistent, roles);
-        //    return SignInResult.Success;
-        //}
-        //else
-        //{
-        //    return attempt;
-        //}
     }
 
     public async Task LogoutAsync()
