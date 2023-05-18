@@ -15,7 +15,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 var app = builder.Build();
 
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsProduction())
 {
     app.UseExceptionHandler();  //for unhandled exceptions in production
     app.UseHsts();
@@ -33,6 +33,8 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseSession();
 
 app.UsePresentation();
 

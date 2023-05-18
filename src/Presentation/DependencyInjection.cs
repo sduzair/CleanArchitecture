@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
+using Presentation.Common;
 using Presentation.Middleware;
 using Presentation.Services;
-using Presentation.Utility;
 
 namespace Presentation;
 public static class DependencyInjection

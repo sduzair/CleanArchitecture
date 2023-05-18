@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Presentation.Authentication;
 
-namespace Presentation.Utility;
+namespace Presentation.Common;
 
 [ApiController]
 [Route("api/[controller]/[action]")]

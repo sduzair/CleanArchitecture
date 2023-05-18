@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace Presentation.Utility;
+namespace Presentation.Common;
 public class ApplicationAspNetCoreResultEndpointProfile : DefaultAspNetCoreResultEndpointProfile
 {
     private readonly ProblemDetailsFactory _problemDetailsFactory;
