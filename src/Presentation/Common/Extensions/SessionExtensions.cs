@@ -1,5 +1,4 @@
-﻿using System.Text;
-using System.Text.Json;
+﻿using System.Text.Json;
 
 using Microsoft.AspNetCore.Http;
 
@@ -18,17 +17,15 @@ internal static class SessionExtensions
     public static T? GetObject<T>(this ISession session, string key)
     {
 
-        //var value = session.GetString(key);
-        var value = session.Get(key);
-        if (value == null)
-        {
-            return default;
-        }
-        else
+        if (session.TryGetValue(key, out var value))
         {
             //T? type = JsonSerializer.Deserialize<T>(value);
             T? type = JsonSerializer.Deserialize<T>(value);
             return type;
+        }
+        else
+        {
+            return default;
         }
     }
 }

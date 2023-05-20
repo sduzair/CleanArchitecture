@@ -3,7 +3,7 @@
 namespace Presentation.Exceptions;
 
 [Serializable]
-internal class ClaimsPrincipalNullException : Exception
+internal sealed class ClaimsPrincipalNullException : Exception
 {
     public ClaimsPrincipalNullException() : base("ClaimsPrincipal is null")
     {
@@ -14,10 +14,6 @@ internal class ClaimsPrincipalNullException : Exception
     }
 
     public ClaimsPrincipalNullException(string? message, Exception? innerException) : base(message, innerException)
-    {
-    }
-
-    protected ClaimsPrincipalNullException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
     }
 }

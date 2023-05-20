@@ -5,8 +5,8 @@ using Application.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Presentation.Common;
 using Presentation.Contracts.Auth;
-using Presentation.Utility;
 
 namespace Presentation.Authentication;
 

@@ -68,8 +68,10 @@ internal class ApplicationUserService : IApplicationUserService
         return (IdentityResult.Success, (await _userManager.GetRolesAsync(user)).AsReadOnly());
     }
 
-    public Task<IReadOnlyList<string>> GetUsersInRoleAsync(string roleName)
+    public async Task<List<string>> GetUsersInRoleAsync(string roleName)
     {
-        throw new NotImplementedException();
+        IList<ApplicationUser> users = await _userManager.GetUsersInRoleAsync(roleName);
+        var userNames = users.Select(u => u.Email!).ToList();
+        return userNames;
     }
 }

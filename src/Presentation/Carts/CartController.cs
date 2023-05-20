@@ -6,6 +6,7 @@ using Application.Common.Security.Roles;
 using Application.Customers.Queries;
 
 using Domain.Carts.ValueObjects;
+using Domain.Customers.ValueObjects;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -17,28 +18,26 @@ using Presentation.Contracts.Carts;
 
 namespace Presentation.Carts;
 
+/// <summary>
+/// The purpose of the Session is to track the items added to the cart by the user when the user is not logged in. The Session is cleared on logout.
+/// </summary>
 [Authorize]
 public sealed class CartController : ApiControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetCartAsync()
     {
-        //Does Cart exist in Session? If not, get it create one.
         var cart = GetCartFromSession() ?? CartDto.Create();
 
-        //Is User logged in as Customer?
         if (User.IsInRole(nameof(Customer)))
         {
-            //Is Session Cart not persisted?
             if (cart.IsNotPersistedAndHasItems)
             {
-                //Update Cart in Store
-                await Mediator.Send(new AddCartItemsCommand(await GetCartIdFromSessionAsync(), cart.Items.Select(product => product.MapTo()).ToHashSet()));
+                await Mediator.Send(new AddItemsToCartCommand(await GetCartIdFromSessionAsync(), cart.Items.Select(product => product.MapTo()).ToList()));
                 cart = cart.AsPersisted();
             }
 
-            //Get Cart from Store
-            var dbCart = (await Mediator.Send(new GetCartQuery())).Value;
+            var dbCart = (await Mediator.Send(new GetCartQuery(await GetCartIdFromSessionAsync()))).Value;
             cart = cart.MapWith(dbCart);
         }
 
@@ -48,17 +47,21 @@ public sealed class CartController : ApiControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> SetCartItemQuatityAsync(CartItemDto cartItem)
+    public async Task<IActionResult> UpdateItemQuantityOrAddItem(CartItemDto cartItem)
     {
         if (User.IsInRole(nameof(Customer)))
         {
-            await Mediator.Send(new SetCartItemQuantityCommand(await GetCartIdFromSessionAsync(), cartItem.MapTo()));
+            await Mediator.Send(new AddItemOrUpdateQuantityCommand(await GetCartIdFromSessionAsync(), cartItem.MapTo()));
+
+            ///returning here is necessary because otherwise <see cref="CartDto.IsNotPersistedAndHasItems"/> will become true despite the items being already persisted
             return NoContent();
         }
 
         CartDto cart = GetCartFromSession() ?? CartDto.Create();
 
-        cart = cart.SetItem(cartItem);
+        cart = cart.SetItem(cartItem)
+            .AsNotPersisted();
+
         SetCartInSession(cart);
 
         return NoContent();
@@ -70,12 +73,15 @@ public sealed class CartController : ApiControllerBase
         if (User.IsInRole(nameof(Customer)))
         {
             await Mediator.Send(new RemoveCartItemCommand(await GetCartIdFromSessionAsync(), cartItem.MapTo()));
+
             return NoContent();
         }
 
         var cart = GetCartFromSession() ?? CartDto.Create();
 
-        cart = cart.RemoveItem(cartItem);
+        cart = cart.RemoveItem(cartItem)
+            .AsNotPersisted();
+
         SetCartInSession(cart);
 
         return NoContent();
@@ -97,22 +103,49 @@ public sealed class CartController : ApiControllerBase
 
     private void SetCartInSession(CartDto cart)
     {
-        //remove cart key
-        //HttpContext.Session.Remove(SessionKeys.Cart);
         HttpContext.Session.SetObject(SessionKeys.Cart, cart);
     }
 
     private async Task<CartId> GetCartIdFromSessionAsync()
     {
-        var cartId = HttpContext.Session.GetString(SessionKeys.CartId);
-        if (cartId == null)
-        {
-            var applicationUserId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var result = await Mediator.Send(new GetCustomerQuery(applicationUserId));
-            cartId = result.Value.Cart!.Id.Value.ToString();
-            HttpContext.Session.SetString(SessionKeys.CartId, cartId);
-        }
-        return CartId.From(cartId);
+        string? cartId = HttpContext.Session.GetString(SessionKeys.CartId);
+
+        if (cartId != null) return CartId.From(cartId);
+
+        var (_, cartIdFromDb) = await GetCustomerIncludeCartAndCreateCartIfNotExistsAndUpdateSession();
+        return cartIdFromDb;
     }
 
+    private async Task<CustomerId> GetCustomerIdFromSessionAsync()
+    {
+        var customerId = HttpContext.Session.GetString(SessionKeys.CustomerId);
+
+        if (customerId != null) return CustomerId.From(customerId);
+        var (customerIdFromDb, _) = await GetCustomerIncludeCartAndCreateCartIfNotExistsAndUpdateSession();
+        return customerIdFromDb;
+    }
+
+    private async Task<(CustomerId, CartId)> GetCustomerIncludeCartAndCreateCartIfNotExistsAndUpdateSession()
+    {
+        var applicationUserId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var result = await Mediator.Send(new GetCustomerByApplicationUserIdIncludeCartQuery(applicationUserId));
+
+        CartId cartId;
+        if(result.Value.Cart is null)
+        {
+            var newCartId = await Mediator.Send(new CreateCartCommand(result.Value.Id));
+            cartId = newCartId.Value;
+        }
+        else
+        {
+            cartId = result.Value.Cart!.Id;
+        }
+
+        HttpContext.Session.SetString(SessionKeys.CartId, cartId.Value.ToString());
+
+        CustomerId customerId = result.Value.Id;
+        HttpContext.Session.SetString(SessionKeys.CustomerId, customerId.Value.ToString());
+
+        return (customerId, cartId);
+    }
 }

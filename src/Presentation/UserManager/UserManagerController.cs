@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-using Presentation.Utility;
+using Presentation.Common;
 
 namespace Presentation.UserManager;
 

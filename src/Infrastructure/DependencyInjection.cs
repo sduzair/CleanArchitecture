@@ -1,6 +1,6 @@
 ﻿using Application;
 using Application.Auth;
-using Application.Products;
+using Application.Common.Security.Policies;
 using Application.UserManager;
 
 using Infrastructure.Common;
@@ -50,20 +50,30 @@ public static class DependencyInjection
 
         services.AddAuthorization(o =>
         {
-            o.AddPolicy(ProductAdminPolicy.PolicyName, p =>
+            o.AddPolicy(nameof(ProductsAdminPolicy), p =>
             {
                 p.RequireAuthenticatedUser();
-                p.RequireRole(ProductAdminPolicy.Roles);
+                p.RequireRole(ProductsAdminPolicy.Roles);
             });
-            o.AddPolicy(ProductManagementPolicy.PolicyName, p =>
+            o.AddPolicy(nameof(ProductsManagementPolicy), p =>
             {
                 p.RequireAuthenticatedUser();
-                p.RequireRole(ProductManagementPolicy.Roles);
+                p.RequireRole(ProductsManagementPolicy.Roles);
             });
-            o.AddPolicy(ProductViewPolicy.PolicyName, p =>
+            o.AddPolicy(nameof(ProductsViewPolicy), p =>
             {
                 p.RequireAuthenticatedUser();
-                p.RequireRole(ProductViewPolicy.Roles);
+                p.RequireRole(ProductsViewPolicy.Roles);
+            });
+            o.AddPolicy(nameof(CartPolicy), p =>
+            {
+                p.RequireAuthenticatedUser();
+                p.RequireRole(CartPolicy.Roles);
+            });
+            o.AddPolicy(nameof(CustomerPolicy), p =>
+            {
+                p.RequireAuthenticatedUser();
+                p.RequireRole(CustomerPolicy.Roles);
             });
         });
 
@@ -78,6 +88,9 @@ public static class DependencyInjection
         services.AddScoped<IApplicationAuthenticationService, ApplicationAuthenticationService>();
         services.AddScoped<IApplicationAuthorizationService, ApplicationAuthorizationService>();
         services.AddScoped<IApplicationUserService, ApplicationUserService>();
+
+        services.AddDistributedMemoryCache();
+        services.AddSession(o => o.IdleTimeout = TimeSpan.FromMinutes(30));
 
         return services;
     }

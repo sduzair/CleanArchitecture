@@ -1,6 +1,8 @@
 ﻿using Application;
 
-using Domain.Products.Entities;
+using Domain.Carts;
+using Domain.Customers;
+using Domain.Products;
 
 using Infrastructure.Identity;
 
@@ -18,6 +20,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     }
 
     public DbSet<Product> Products { get; set; }
+    public DbSet<Cart> Carts { get; set; }
+    public DbSet<Customer> Customers { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

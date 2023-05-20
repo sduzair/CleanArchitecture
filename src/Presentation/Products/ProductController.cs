@@ -9,16 +9,17 @@ using FluentResults.Extensions.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-using Presentation.Utility;
+using Presentation.Common;
+using Presentation.Contracts.Products;
 
 namespace Presentation.Products;
 
 [Authorize]
-public sealed class ProductsController : ApiControllerBase
+public sealed class ProductController : ApiControllerBase
 {
     private readonly ApplicationAspNetCoreResultEndpointProfile _resultProfile;
 
-    public ProductsController(ApplicationAspNetCoreResultEndpointProfile resultProfile)
+    public ProductController(ApplicationAspNetCoreResultEndpointProfile resultProfile)
     {
         _resultProfile = resultProfile;
     }
@@ -38,15 +39,15 @@ public sealed class ProductsController : ApiControllerBase
     public async Task<IActionResult> GetProducts()
     {
         return await Mediator.Send(new GetProductsQuery())
-            .Map((products) => products.Select(ProductDto.MapFrom))
+            .Map((products) => products.Select(product => product.MapTo()))
             .ToActionResult(_resultProfile);
     }
 
     [HttpGet]
     public async Task<IActionResult> GetProductById(Guid id)
     {
-        return await Mediator.Send(new GetProductByIdQuery(ProductId.Create(id)))
-            .Map(ProductDto.MapFrom)
+        return await Mediator.Send(new GetProductByIdQuery(ProductId.From(id)))
+            .Map(product => product.MapTo())
             .ToActionResult(_resultProfile);
     }
 
@@ -66,7 +67,7 @@ public sealed class ProductsController : ApiControllerBase
     [HttpDelete]
     public async Task<IActionResult> DeleteProduct(Guid id)
     {
-        return await Mediator.Send(new DeleteProductCommand(ProductId.Create(id)))
+        return await Mediator.Send(new DeleteProductCommand(ProductId.From(id)))
             .ToActionResult(_resultProfile);
     }
 }

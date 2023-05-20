@@ -1,8 +1,4 @@
-﻿using System.Security.Claims;
-
-using Application.Auth;
-
-using Infrastructure.Common;
+﻿using Application.Auth;
 
 using Microsoft.AspNetCore.Identity;
 
