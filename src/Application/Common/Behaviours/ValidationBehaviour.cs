@@ -9,7 +9,7 @@ using MediatR;
 
 namespace Application.Common.Behaviours;
 
-internal class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+internal sealed class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
     where TResponse : ResultBase, new()
 {

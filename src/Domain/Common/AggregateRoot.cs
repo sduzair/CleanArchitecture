@@ -1,6 +1,6 @@
 ﻿namespace Domain.Common;
 
-public abstract class AggregateRoot<TId> : Entity<TId>
+public abstract class AggregateRoot<TId> : Entity<TId> where TId : struct
 {
     //private readonly List<DomainEventBase> _domainEvents = new();
 

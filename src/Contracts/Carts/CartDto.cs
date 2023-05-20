@@ -4,16 +4,25 @@ using Domain.Carts;
 
 namespace Presentation.Contracts.Carts;
 
+/// <summary>
+/// Creates a CartDto with a new Guid and an empty HashSet of CartItemDto. isPersisted is true by default and set to false when user other than <see cref="Customer"/> adds/removes items from the cart.
+/// </summary>
 public sealed record CartDto(Guid Id,
     HashSet<CartItemDto> Items,
-    bool IsPersisted,
     int ItemsCount,
-    decimal TotalPrice)
+    decimal TotalPrice,
+    bool IsPersisted = true)
 {
     /// <summary>
-    /// SetItem the Cart as persisted in the Store.
+    /// Set the Cart as persisted in the Store.
     /// </summary>
     public CartDto AsPersisted() => this with { IsPersisted = true };
+
+    /// <summary>
+    /// Set the Cart as not persisted in the Store.
+    /// </summary>
+    /// <returns></returns>
+    public CartDto AsNotPersisted() => this with { IsPersisted = false };
 
     /// <summary>
     /// Returns true if the Cart has been persisted in the Store or if it has no items.
@@ -21,51 +30,43 @@ public sealed record CartDto(Guid Id,
     [JsonIgnore]
     public bool IsNotPersistedAndHasItems => !IsPersisted && Items.Any();
 
-    /// <summary>
-    /// Creates a CartDto with a new Guid and an empty HashSet of CartItemDto. isPersisted is false by default.
-    /// </summary>
-    /// <returns></returns>
     public static CartDto Create()
     {
         HashSet<CartItemDto> items = new();
         decimal totalPrice = items.Aggregate(0m, (acc, item) => acc + item.UnitPrice);
-        return new(Guid.Empty, items, IsPersisted: false, items.Count, totalPrice);
+        return new(Guid.Empty, items, items.Count, totalPrice);
     }
-
-    //public void SetItem(CartItemDto cartItem)
-    //{
-    //    if(Items.TryGetValue(cartItem, out var item))
-    //    {
-    //        item.UpdateQuantity(cartItem.Quantity);
-    //    }
-    //    else
-    //    {
-    //        Items.Add(cartItem);
-    //    }
-    //}
 
     public CartDto SetItem(CartItemDto cartItem)
     {
-        Items.Remove(cartItem);
-        Items.Add(cartItem);
+        var items = Items.ToHashSet();
+        if (items.TryGetValue(cartItem, out var item))
+        {
+            item.UpdateQuantity(cartItem.Quantity);
+        }
+        else
+        {
+            items.Add(cartItem);
+        }
 
         return this with
         {
-            Items = Items,
-            ItemsCount = Items.Aggregate(0,  (acc, item) => acc + item.Quantity),
-            TotalPrice = Items.Aggregate(0m, (acc, item) => acc + item.UnitPrice * item.Quantity)
+            Items = items,
+            ItemsCount = items.Aggregate(0,  (acc, item) => acc + item.Quantity),
+            TotalPrice = items.Aggregate(0m, (acc, item) => acc + item.UnitPrice * item.Quantity)
         };
     }
 
     public CartDto RemoveItem(CartItemDto cartItem)
     {
-        Items.Remove(cartItem);
+        var items = Items.ToHashSet();
+        items.Remove(cartItem);
 
         return this with
         {
-            Items = Items,
-            ItemsCount = Items.Aggregate(0,  (acc, item) => acc + item.Quantity),
-            TotalPrice = Items.Aggregate(0m, (acc, item) => acc + item.UnitPrice * item.Quantity)
+            Items = items,
+            ItemsCount = items.Aggregate(0,  (acc, item) => acc + item.Quantity),
+            TotalPrice = items.Aggregate(0m, (acc, item) => acc + item.UnitPrice * item.Quantity)
         };
     }
 
@@ -74,7 +75,9 @@ public sealed record CartDto(Guid Id,
         return this with
         {
             Id = cart.Id.Value,
-            Items = cart.Items.Select(item => item.MapTo()).ToHashSet()
+            Items = cart.Items.Select(item => item.MapTo()).ToHashSet(),
+            ItemsCount = cart.Items.Aggregate(0,  (acc, item) => acc + item.Quantity),
+            TotalPrice = cart.Items.Aggregate(0m, (acc, item) => acc + item.UnitPrice * item.Quantity)
         };
     }
 }

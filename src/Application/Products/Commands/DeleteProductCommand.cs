@@ -1,4 +1,5 @@
 ﻿using Application.Common.Security;
+using Application.Common.Security.Policies;
 
 using Domain.Products.Errors;
 using Domain.Products.ValueObjects;
@@ -9,7 +10,7 @@ using MediatR;
 
 namespace Application.Products.Commands;
 
-[ApplicationAuthorize(Policy = ProductAdminPolicy.PolicyName)]
+[ApplicationAuthorize(Policy = nameof(ProductsAdminPolicy))]
 public record DeleteProductCommand(ProductId Id) : IRequest<Result>;
 
 internal sealed class DeleteProductCommandHandler : IRequestHandler<DeleteProductCommand, Result>

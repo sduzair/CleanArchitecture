@@ -1,10 +1,8 @@
 ﻿namespace Domain.Products.ValueObjects;
 
-public record ProductId(Guid Value)
+public readonly record struct ProductId(Guid Value)
 {
-    public static ProductId CreateUnique() => new(Guid.NewGuid());
-    public static ProductId Create(Guid value) => new(value);
-    //create from string
-    public static ProductId Create(string value) => new(Guid.Parse(value));
-
+    public static ProductId Create() => new(Guid.NewGuid());
+    public static ProductId From(Guid value) => new(value);
+    public static ProductId From(string value) => new(Guid.Parse(value));
 }

@@ -1,6 +1,7 @@
 ﻿using Application.Common.Security;
+using Application.Common.Security.Policies;
 
-using Domain.Products.Entities;
+using Domain.Products;
 using Domain.Products.Errors;
 using Domain.Products.ValueObjects;
 
@@ -10,7 +11,7 @@ using MediatR;
 
 namespace Application.Products.Queries;
 
-[ApplicationAuthorize(Policy = ProductViewPolicy.PolicyName)]
+[ApplicationAuthorize(Policy = nameof(ProductsViewPolicy))]
 public record GetProductByIdQuery(ProductId Id) : IRequest<Result<Product>>;
 
 internal sealed class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQuery, Result<Product>>

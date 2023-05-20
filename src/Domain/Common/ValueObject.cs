@@ -1,12 +1,13 @@
 ﻿namespace Domain.Common;
 
-public abstract class ValueObject : IComparable, IComparable<ValueObject>
+public abstract class ValueObject : IValueObject
 {
-    private int? _cachedHashCode;
     protected abstract IEnumerable<object> GetEqualityComponents();
+
+    private int? _cachedHashCode;
     public override int GetHashCode()
     {
-        if(!_cachedHashCode.HasValue)
+        if (!_cachedHashCode.HasValue)
         {
             _cachedHashCode = GetEqualityComponents()
                 .Aggregate(1, (current, next) =>
@@ -19,6 +20,34 @@ public abstract class ValueObject : IComparable, IComparable<ValueObject>
         }
 
         return _cachedHashCode.Value;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is not ValueObject other) return false;
+
+        return GetEqualityComponents().SequenceEqual(other.GetEqualityComponents());
+    }
+
+    public bool Equals(IValueObject? other)
+    {
+        return Equals(other);
+    }
+
+    public static bool operator ==(ValueObject a, ValueObject b)
+    {
+        if (a is null && b is null)
+            return true;
+
+        if (a is null || b is null)
+            return false;
+
+        return a.Equals(b);
+    }
+
+    public static bool operator !=(ValueObject a, ValueObject b)
+    {
+        return !(a == b);
     }
 
     public int CompareTo(object? obj)
@@ -63,28 +92,8 @@ public abstract class ValueObject : IComparable, IComparable<ValueObject>
         return object1.Equals(object2) ? 0 : -1;
     }
 
-    public int CompareTo(ValueObject? other)
+    public int CompareTo(IValueObject? other)
     {
         return CompareTo(other as object);
-    }
-    public override bool Equals(object? obj)
-    {
-        if (obj is not ValueObject other) return false;
-
-        return GetEqualityComponents().SequenceEqual(other.GetEqualityComponents());
-    }
-    public static bool operator ==(ValueObject a, ValueObject b)
-    {
-        if (a is null && b is null)
-            return true;
-
-        if (a is null || b is null)
-            return false;
-
-        return a.Equals(b);
-    }
-    public static bool operator !=(ValueObject a, ValueObject b)
-    {
-        return !(a == b);
     }
 }

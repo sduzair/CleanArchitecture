@@ -15,20 +15,22 @@ using Microsoft.EntityFrameworkCore;
 namespace Application.Carts.Commands;
 
 [ApplicationAuthorize(Policy = nameof(CartPolicy))]
-public record RemoveCartItemCommand(CartId CartId, CartItem CartItem) : IRequest<Result>;
+public record AddItemOrUpdateQuantityCommand(CartId CartId, CartItem CartItem) : IRequest<Result>;
 
-internal sealed class RemoveCartItemCommandHandler : IRequestHandler<RemoveCartItemCommand, Result>
+internal sealed class AddItemOrUpdateQuantityCommandHandler : IRequestHandler<AddItemOrUpdateQuantityCommand, Result>
 {
     private readonly IApplicationDbContext _context;
 
-    public RemoveCartItemCommandHandler(IApplicationDbContext context)
+    public AddItemOrUpdateQuantityCommandHandler(IApplicationDbContext context)
     {
         _context = context;
     }
 
-    public async Task<Result> Handle(RemoveCartItemCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(AddItemOrUpdateQuantityCommand request, CancellationToken cancellationToken)
     {
         var (cartId, cartItem) = request;
+
+        //TODO - check whether specifying include is necessary because Items is "Owned" by Cart
         var cart = await _context.Carts
             .Include(x => x.Items)
             .FirstOrDefaultAsync(x => x.Id == cartId, cancellationToken);
@@ -37,11 +39,8 @@ internal sealed class RemoveCartItemCommandHandler : IRequestHandler<RemoveCartI
         {
             return Result.Fail(new CartNotFoundError(cartId));
         }
-
-        cart.RemoveItem(cartItem);
-
+        cart.UpdateItemQuantityOrAddItem(request.CartItem);
         await _context.SaveChangesAsync(cancellationToken);
-
         return Result.Ok();
     }
 }

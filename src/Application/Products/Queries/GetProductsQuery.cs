@@ -1,6 +1,7 @@
 ﻿using Application.Common.Security;
+using Application.Common.Security.Policies;
 
-using Domain.Products.Entities;
+using Domain.Products;
 
 using FluentResults;
 
@@ -10,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Products.Queries;
 
-[ApplicationAuthorize(Policy = ProductViewPolicy.PolicyName)]
+[ApplicationAuthorize(Policy = nameof(ProductsViewPolicy))]
 public record class GetProductsQuery : IRequest<Result<IEnumerable<Product>>>;
 
 internal sealed class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, Result<IEnumerable<Product>>>
