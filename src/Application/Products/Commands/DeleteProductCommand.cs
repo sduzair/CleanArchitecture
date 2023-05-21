@@ -11,29 +11,30 @@ using MediatR;
 namespace Application.Products.Commands;
 
 [ApplicationAuthorize(Policy = nameof(ProductsAdminPolicy))]
-public record DeleteProductCommand(ProductId Id) : IRequest<Result>;
-
-internal sealed class DeleteProductCommandHandler : IRequestHandler<DeleteProductCommand, Result>
+public record DeleteProductCommand(ProductId Id) : IRequest<Result>
 {
-    private readonly IApplicationDbContext _applicationDbContext;
-
-    public DeleteProductCommandHandler(IApplicationDbContext applicationDbContext)
+    internal sealed class Handler : IRequestHandler<DeleteProductCommand, Result>
     {
-        _applicationDbContext = applicationDbContext;
-    }
+        private readonly IApplicationDbContext _applicationDbContext;
 
-    public async Task<Result> Handle(DeleteProductCommand request, CancellationToken cancellationToken)
-    {
-        var product = await _applicationDbContext.Products.FindAsync(new object?[] { request.Id }, cancellationToken: cancellationToken);
-        if (product is null)
+        public Handler(IApplicationDbContext applicationDbContext)
         {
-            return Result.Fail(new ProductNotFoundError(request.Id));
+            _applicationDbContext = applicationDbContext;
         }
-        _applicationDbContext.Products.Remove(product);
-        _ = await _applicationDbContext.SaveChangesAsync(cancellationToken);
 
-        //add entries changed to meta data
+        public async Task<Result> Handle(DeleteProductCommand request, CancellationToken cancellationToken)
+        {
+            var product = await _applicationDbContext.Products.FindAsync(new object?[] { request.Id }, cancellationToken: cancellationToken);
+            if (product is null)
+            {
+                return Result.Fail(new ProductNotFoundError(request.Id));
+            }
+            _applicationDbContext.Products.Remove(product);
+            _ = await _applicationDbContext.SaveChangesAsync(cancellationToken);
 
-        return Result.Ok();
+            //add entries changed to meta data
+
+            return Result.Ok();
+        }
     }
 }

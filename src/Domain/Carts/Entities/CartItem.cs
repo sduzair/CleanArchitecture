@@ -1,10 +1,12 @@
-﻿using Domain.Common;
+﻿using Domain.Carts.Errors;
+using Domain.Common;
 using Domain.Products;
 using Domain.Products.ValueObjects;
 
+using FluentResults;
+
 namespace Domain.Carts.Entities;
 
-//TODO - change to ValueObject
 public sealed class CartItem : ValueObject
 {
     public string Name { get; init; }
@@ -50,9 +52,34 @@ public sealed class CartItem : ValueObject
     //    };
     //}
 
-    public void UpdateQuantity(int quantity)
+    public Result UpdateQuantity(int quantity)
     {
+        var result = new Result();
+        if(!MustNotBeZeroQuantity(Quantity, quantity))
+        {
+            result.WithError(new MustNotBeZeroQuantityValidationError());
+        }
+        if (!MustHavePositiveQuantity(Quantity, quantity))
+        {
+            result.WithError(new MustHavePositiveTotalQuantityValidationError(Quantity + quantity));
+        }
+        if (result.IsFailed)
+        {
+            return result;
+        }
+
         Quantity += quantity;
+        return result;
+    }
+
+    public static bool MustNotBeZeroQuantity(int oldQuantity, int newQuantity)
+    {
+        return oldQuantity + newQuantity != 0;
+    }
+
+    public static bool MustHavePositiveQuantity(int oldQuantity, int newQuantity)
+    {
+        return oldQuantity + newQuantity > 0;
     }
 
     protected override IEnumerable<object> GetEqualityComponents()

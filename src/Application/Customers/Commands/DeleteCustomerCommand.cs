@@ -1,4 +1,6 @@
 ﻿using Application;
+using Application.Common.Security;
+using Application.Common.Security.Policies;
 
 using Domain.Customers.Errors;
 
@@ -8,27 +10,30 @@ using MediatR;
 
 using Microsoft.EntityFrameworkCore;
 
-namespace Presentation.Customers;
-public record DeleteCustomerCommand(Guid ApplicationUserId) : IRequest<Result>;
+namespace Application.Customers.Commands;
 
-internal class DeleteCustomerCommandHandler : IRequestHandler<DeleteCustomerCommand, Result>
+//[ApplicationAuthorize(Policy = nameof(CustomerPolicy))]
+public record DeleteCustomerCommand(Guid ApplicationUserId) : IRequest<Result>
 {
-    private readonly IApplicationDbContext _context;
-
-    public DeleteCustomerCommandHandler(IApplicationDbContext context)
+    internal class Handler : IRequestHandler<DeleteCustomerCommand, Result>
     {
-        _context = context;
-    }
+        private readonly IApplicationDbContext _context;
 
-    public async Task<Result> Handle(DeleteCustomerCommand request, CancellationToken cancellationToken)
-    {
-        var customer = await _context.Customers.SingleOrDefaultAsync(c => c.ApplicationUserId == request.ApplicationUserId, cancellationToken);
-        if (customer == null)
+        public Handler(IApplicationDbContext context)
         {
-            return Result.Fail(new CustomerNotFoundError(request.ApplicationUserId));
+            _context = context;
         }
-        _context.Customers.Remove(customer);
-        await _context.SaveChangesAsync(cancellationToken);
-        return Result.Ok();
+
+        public async Task<Result> Handle(DeleteCustomerCommand request, CancellationToken cancellationToken)
+        {
+            var customer = await _context.Customers.SingleOrDefaultAsync(c => c.ApplicationUserId == request.ApplicationUserId, cancellationToken);
+            if (customer == null)
+            {
+                return Result.Fail(new CustomerNotFoundError(request.ApplicationUserId));
+            }
+            _context.Customers.Remove(customer);
+            await _context.SaveChangesAsync(cancellationToken);
+            return Result.Ok();
+        }
     }
 }

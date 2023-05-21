@@ -8,6 +8,8 @@ using Application.Customers.Queries;
 using Domain.Carts.ValueObjects;
 using Domain.Customers.ValueObjects;
 
+using FluentResults.Extensions.AspNetCore;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -24,6 +26,13 @@ namespace Presentation.Carts;
 [Authorize]
 public sealed class CartController : ApiControllerBase
 {
+    private readonly ApplicationAspNetCoreResultEndpointProfile _resultProfile;
+
+    public CartController(ApplicationAspNetCoreResultEndpointProfile resultProfile)
+    {
+        _resultProfile = resultProfile;
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetCartAsync()
     {
@@ -51,7 +60,12 @@ public sealed class CartController : ApiControllerBase
     {
         if (User.IsInRole(nameof(Customer)))
         {
-            await Mediator.Send(new AddItemOrUpdateQuantityCommand(await GetCartIdFromSessionAsync(), cartItem.MapTo()));
+            var result = await Mediator.Send(new AddItemOrUpdateQuantityCommand(await GetCartIdFromSessionAsync(), cartItem.MapTo()));
+
+            if (result.IsFailed)
+            {
+                return result.ToActionResult(_resultProfile);
+            }
 
             ///returning here is necessary because otherwise <see cref="CartDto.IsNotPersistedAndHasItems"/> will become true despite the items being already persisted
             return NoContent();

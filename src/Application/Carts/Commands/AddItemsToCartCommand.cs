@@ -1,4 +1,7 @@
-﻿using Domain.Carts;
+﻿using Application.Common.Security;
+using Application.Common.Security.Policies;
+
+using Domain.Carts;
 using Domain.Carts.Entities;
 using Domain.Carts.Errors;
 using Domain.Carts.ValueObjects;
@@ -16,36 +19,45 @@ namespace Application.Carts.Commands;
 /// </summary>
 /// <param name="CustomerId"></param>
 /// <param name="CartItems"></param>
-public record AddItemsToCartCommand(CartId CustomerId, IReadOnlyCollection<CartItem> CartItems) : IRequest<Result>;
-
-internal class AddItemsCreateCartIdNotExistsCommandHandler : IRequestHandler<AddItemsToCartCommand, Result>
+[ApplicationAuthorize(Policy = nameof(CartPolicy))]
+public record AddItemsToCartCommand(CartId CustomerId, IReadOnlyCollection<CartItem> CartItems) : IRequest<Result>
 {
-    private readonly IApplicationDbContext _context;
-
-    public AddItemsCreateCartIdNotExistsCommandHandler(IApplicationDbContext context)
+    internal class Handler : IRequestHandler<AddItemsToCartCommand, Result>
     {
-        _context = context;
-    }
+        private readonly IApplicationDbContext _context;
 
-    public async Task<Result> Handle(AddItemsToCartCommand request, CancellationToken cancellationToken)
-    {
-        var (cartId, cartItems) = request;
-
-        var cart = await _context.Carts
-            .Include(cart => cart.Items)
-            .SingleOrDefaultAsync(cart => cart.Id == cartId, cancellationToken);
-
-        if (cart is null)
+        public Handler(IApplicationDbContext context)
         {
-            return Result.Fail(new CartNotFoundError(cartId));
-        }
-        else
-        {
-            cart.AddItems(cartItems);
+            _context = context;
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
+        public async Task<Result> Handle(AddItemsToCartCommand request, CancellationToken cancellationToken)
+        {
+            var (cartId, cartItems) = request;
 
-        return Result.Ok();
+            var cart = await _context.Carts
+                .Include(cart => cart.Items)
+                .SingleOrDefaultAsync(cart => cart.Id == cartId, cancellationToken);
+
+            Result? result;
+            if (cart is null)
+            {
+                return Result.Fail(new CartNotFoundError(cartId));
+            }
+            else
+            {
+                result = cart.AddItems(cartItems);
+            }
+
+            if (result.IsFailed)
+            {
+                return result;
+            }
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return Result.Ok();
+        }
     }
 }
+

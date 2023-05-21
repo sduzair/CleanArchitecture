@@ -14,28 +14,29 @@ using Microsoft.EntityFrameworkCore;
 namespace Application.Carts.Queries;
 
 [ApplicationAuthorize(Policy = nameof(CartPolicy))]
-public record GetCartQuery(CartId CartId) : IRequest<Result<Cart>>;
-
-internal sealed class GetCartQueryHandler : IRequestHandler<GetCartQuery, Result<Cart>>
+public record GetCartQuery(CartId CartId) : IRequest<Result<Cart>>
 {
-    private readonly IApplicationDbContext _context;
-
-    public GetCartQueryHandler(IApplicationDbContext context)
+    internal sealed class Handler : IRequestHandler<GetCartQuery, Result<Cart>>
     {
-        _context = context;
-    }
+        private readonly IApplicationDbContext _context;
 
-    public async Task<Result<Cart>> Handle(GetCartQuery request, CancellationToken cancellationToken)
-    {
-        var cart = await _context.Carts
-            .Include(cart => cart.Items)
-            .SingleOrDefaultAsync(cart => cart.Id == request.CartId, cancellationToken);
-
-        if (cart is null)
+        public Handler(IApplicationDbContext context)
         {
-            return Result.Fail(new CartNotFoundError(request.CartId));
+            _context = context;
         }
 
-        return cart;
+        public async Task<Result<Cart>> Handle(GetCartQuery request, CancellationToken cancellationToken)
+        {
+            var cart = await _context.Carts
+                .Include(cart => cart.Items)
+                .SingleOrDefaultAsync(cart => cart.Id == request.CartId, cancellationToken);
+
+            if (cart is null)
+            {
+                return Result.Fail(new CartNotFoundError(request.CartId));
+            }
+
+            return cart;
+        }
     }
 }

@@ -2,6 +2,7 @@
 using Application.Common.Security.Policies;
 
 using Domain.Customers;
+using Domain.Customers.Errors;
 
 using FluentResults;
 
@@ -12,26 +13,28 @@ using Microsoft.EntityFrameworkCore;
 namespace Application.Customers.Queries;
 
 [ApplicationAuthorize(Policy = nameof(CustomerPolicy))]
-public record GetCustomerByApplicationUserIdQuery(Guid ApplicationUserId) : IRequest<Result<Customer>>;
-
-internal class GetCustomerByIdQueryHandler : IRequestHandler<GetCustomerByApplicationUserIdQuery, Result<Customer>>
+public record GetCustomerByApplicationUserIdQuery(Guid ApplicationUserId) : IRequest<Result<Customer>>
 {
-    private readonly IApplicationDbContext _context;
-
-    public GetCustomerByIdQueryHandler(IApplicationDbContext context)
+    internal class Handler : IRequestHandler<GetCustomerByApplicationUserIdQuery, Result<Customer>>
     {
-        _context = context;
-    }
+        private readonly IApplicationDbContext _context;
 
-    public async Task<Result<Customer>> Handle(GetCustomerByApplicationUserIdQuery request, CancellationToken cancellationToken)
-    {
-        var customer = await _context.Customers.SingleOrDefaultAsync(customer => customer.ApplicationUserId == request.ApplicationUserId, cancellationToken: cancellationToken);
-
-        if (customer == null)
+        public Handler(IApplicationDbContext context)
         {
-            return Result.Fail("Customer not found");
+            _context = context;
         }
 
-        return Result.Ok(customer);
+        public async Task<Result<Customer>> Handle(GetCustomerByApplicationUserIdQuery request, CancellationToken cancellationToken)
+        {
+            var customer = await _context.Customers.SingleOrDefaultAsync(customer => customer.ApplicationUserId == request.ApplicationUserId, cancellationToken: cancellationToken);
+
+            if (customer == null)
+            {
+                return Result.Fail(new CustomerNotFoundError(request.ApplicationUserId));
+            }
+
+            return Result.Ok(customer);
+        }
     }
 }
+

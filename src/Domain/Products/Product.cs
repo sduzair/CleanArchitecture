@@ -1,6 +1,8 @@
 ﻿using Domain.Common;
 using Domain.Products.ValueObjects;
 
+using FluentResults;
+
 namespace Domain.Products;
 
 public sealed class Product : AggregateRoot<ProductId>
@@ -13,16 +15,26 @@ public sealed class Product : AggregateRoot<ProductId>
     //ef core constructor to map entity
     private Product() { }
 
-    public static Product Create(string name, string description, decimal price, int stock)
+    private Product(ProductId id, string name, string description, decimal price, int stock)
     {
-        return new()
-        {
-            Id = ProductId.Create(),
-            Name = name,
-            Description = description,
-            Price = price,
-            Stock = stock,
-        };
+        Id = id;
+        Name = name;
+        Description = description;
+        Price = price;
+        Stock = stock;
+    }
+
+    public static Result<Product> Create(string name, string description, decimal price, int stock)
+    {
+        //TODO: add validation
+        return new Product
+        (
+            id: ProductId.Create(),
+            name: name,
+            description: description,
+            price: price,
+            stock: stock
+        );
     }
 
     public void Update(string name, string description, decimal unitPrice)

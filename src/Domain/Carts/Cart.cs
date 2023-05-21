@@ -1,7 +1,10 @@
 ﻿using Domain.Carts.Entities;
+using Domain.Carts.Errors;
 using Domain.Carts.ValueObjects;
 using Domain.Common;
 using Domain.Customers.ValueObjects;
+
+using FluentResults;
 
 namespace Domain.Carts;
 
@@ -33,32 +36,70 @@ public sealed class Cart : AggregateRoot<CartId>
     {
         return new(CartId.Create(), customerId, items);
     }
-    //public static Cart Create()
-    //{
-    //    var customerId = CustomerId.Create();
-    //    var items = new HashSet<CartItem>();
-    //    return new(CartId.Create(), customerId, items);
-    //}
 
-    public void UpdateItemQuantityOrAddItem(CartItem cartItem)
+    public Result AddItemOrUpdateQuantity(CartItem cartItemToAddOrUpdate)
     {
-        //var cartItem = CartItem.From(CartItemId.From(Items.Count + 1), Id, product);
-        if (_items.TryGetValue(cartItem, out var item))
+        Result result = new();
+
+        if (!MustHavePositiveUnitPrice(cartItemToAddOrUpdate))
         {
-            item.UpdateQuantity(cartItem.Quantity);
+            result.WithError(new MustHavePositiveUnitPriceValidationError(cartItemToAddOrUpdate.UnitPrice));
+        }
+
+        Result? resultAddOrUpdate;
+        if (_items.TryGetValue(cartItemToAddOrUpdate, out var item))
+        {
+            resultAddOrUpdate = item.UpdateQuantity(cartItemToAddOrUpdate.Quantity);
         }
         else
         {
-            _items.Add(cartItem);
+            resultAddOrUpdate = AddItem(cartItemToAddOrUpdate);
         }
+
+        if (resultAddOrUpdate.IsFailed)
+        {
+            result.WithErrors(resultAddOrUpdate.Errors);
+        }
+        return result;
     }
 
-    public void AddItems(IReadOnlyCollection<CartItem> items)
+    private static bool MustHavePositiveUnitPrice(CartItem item)
     {
+        return item.UnitPrice > 0;
+    }
+
+    private Result AddItem(CartItem cartItemToAdd)
+    {
+        var result = new Result();
+        if (!CartItem.MustNotBeZeroQuantity(0, cartItemToAdd.Quantity))
+        {
+            result.WithError(new MustNotBeZeroQuantityValidationError());
+        }
+        if (!CartItem.MustHavePositiveQuantity(0, cartItemToAdd.Quantity))
+        {
+            result.WithError(new MustHavePositiveTotalQuantityValidationError(0 +  cartItemToAdd.Quantity));
+        }
+        if (result.IsFailed)
+        {
+            return result;
+        }
+
+        _items.Add(cartItemToAdd);
+        return Result.Ok();
+    }
+
+    public Result AddItems(IReadOnlyCollection<CartItem> items)
+    {
+        var result = new Result();
         for(int i = 0; i < items.Count; i++)
         {
-            UpdateItemQuantityOrAddItem(items.ElementAt(i));
+            var resultAddItem = AddItem(items.ElementAt(i));
+            if (resultAddItem.IsFailed)
+            {
+                result.WithErrors(resultAddItem.Errors);
+            }
         }
+        return result;
     }
 
     public void RemoveItem(CartItem cartItem)

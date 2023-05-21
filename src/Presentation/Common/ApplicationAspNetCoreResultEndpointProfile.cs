@@ -47,18 +47,17 @@ public class ApplicationAspNetCoreResultEndpointProfile : DefaultAspNetCoreResul
         }
 
         //Validation problem details error
-        IValidationError? validationError = context.Result.Errors.OfType<IValidationError>().FirstOrDefault();
+        var validationErrors = context.Result.Errors.OfType<IValidationError>();
 
-        if (validationError != null)
+        if (validationErrors.Any())
         {
             var modelState = new ModelStateDictionary();
-            foreach (var entry in validationError.GetValidationDictionary())
+
+            foreach (var validationError in validationErrors)
             {
-                foreach (var value in entry.Value)
-                {
-                    modelState.AddModelError(entry.Key, value);
-                }
+                modelState.AddModelError(validationError.Key, validationError.Message);
             }
+
             var validationProblemDetails = _problemDetailsFactory.CreateValidationProblemDetails(
                 httpContext: _contextAccessor.HttpContext!,
                 modelStateDictionary: modelState);

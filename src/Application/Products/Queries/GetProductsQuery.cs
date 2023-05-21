@@ -12,19 +12,21 @@ using Microsoft.EntityFrameworkCore;
 namespace Application.Products.Queries;
 
 [ApplicationAuthorize(Policy = nameof(ProductsViewPolicy))]
-public record class GetProductsQuery : IRequest<Result<IEnumerable<Product>>>;
-
-internal sealed class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, Result<IEnumerable<Product>>>
-
+public record class GetProductsQuery : IRequest<Result<IEnumerable<Product>>>
 {
-    private readonly IApplicationDbContext _applicationDbContext;
-    public GetProductsQueryHandler(IApplicationDbContext context)
+    internal sealed class Handler : IRequestHandler<GetProductsQuery, Result<IEnumerable<Product>>>
+
     {
-        _applicationDbContext = context;
-    }
-    public async Task<Result<IEnumerable<Product>>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
-    {
-        List<Product> products = await _applicationDbContext.Products.ToListAsync(cancellationToken);
-        return products;
+        private readonly IApplicationDbContext _applicationDbContext;
+        public Handler(IApplicationDbContext context)
+        {
+            _applicationDbContext = context;
+        }
+        public async Task<Result<IEnumerable<Product>>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
+        {
+            List<Product> products = await _applicationDbContext.Products.ToListAsync(cancellationToken);
+            return products;
+        }
     }
 }
+
