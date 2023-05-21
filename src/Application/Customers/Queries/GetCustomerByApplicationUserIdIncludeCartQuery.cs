@@ -35,7 +35,7 @@ public record GetCustomerByApplicationUserIdIncludeCartQuery(Guid ApplicationUse
 
             if (customer is null)
             {
-                return Result.Fail(new CustomerNotFoundError(request.ApplicationUserId);
+                return Result.Fail(new CustomerNotFoundError(request.ApplicationUserId));
             }
 
             return Result.Ok(customer);
