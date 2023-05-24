@@ -2,7 +2,6 @@
 using Application.Auth;
 using Application.Common.Security.Policies;
 using Application.Common.Security.Schemes;
-using Application.Common.Security.Schemes.Application;
 using Application.Common.Security.Schemes.Visitor;
 using Application.UserManager;
 
@@ -11,9 +10,7 @@ using Infrastructure.Identity;
 using Infrastructure.Utilities;
 
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

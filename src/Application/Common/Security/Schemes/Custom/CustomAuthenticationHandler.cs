@@ -1,8 +1,11 @@
 ﻿using System.Security.Claims;
 using System.Text.Encodings.Web;
+using System.Text.Json;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -13,7 +16,12 @@ namespace Application.Common.Security.Schemes.Visitor;
 /// </summary>
 public class CustomAuthenticationHandler : CookieAuthenticationHandler
 {
-    public CustomAuthenticationHandler(IOptionsMonitor<CookieAuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock) : base(options, logger, encoder, clock) { }
+    private readonly ProblemDetailsFactory _problemDetailsFactory;
+
+    public CustomAuthenticationHandler(IOptionsMonitor<CookieAuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock, ProblemDetailsFactory problemDetailsFactory) : base(options, logger, encoder, clock)
+    {
+        _problemDetailsFactory = problemDetailsFactory;
+    }
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
@@ -45,14 +53,40 @@ public class CustomAuthenticationHandler : CookieAuthenticationHandler
     protected override Task HandleChallengeAsync(AuthenticationProperties properties)
     {
         //return 401 response instead of redirecting to login page
+        //Response.StatusCode = 401;
+        //return Task.CompletedTask;
+
+        //problem details error response 401 instead of redirecting to login page
+        var problemDetails = _problemDetailsFactory.CreateProblemDetails(
+            httpContext: Context,
+            statusCode: 401,
+            title: "Unauthorized",
+            detail: "You are not authorized to access this resource.");
+
         Response.StatusCode = 401;
+        Response.ContentType = "application/problem+json";
+        Response.WriteAsync(JsonSerializer.Serialize(problemDetails));
+
         return Task.CompletedTask;
     }
 
     protected override Task HandleForbiddenAsync(AuthenticationProperties properties)
     {
         //return 403 response instead of redirecting to access denied page
+        //Response.StatusCode = 403;
+        //return Task.CompletedTask;
+
+        //problem details error response 403 instead of redirecting to access denied page
+        var problemDetails = _problemDetailsFactory.CreateProblemDetails(
+            httpContext: Context,
+            statusCode: 403,
+            title: "Forbidden",
+            detail: "You are not authorized to access this resource.");
+
         Response.StatusCode = 403;
+        Response.ContentType = "application/problem+json";
+        Response.WriteAsync(JsonSerializer.Serialize(problemDetails));
+
         return Task.CompletedTask;
     }
 }
