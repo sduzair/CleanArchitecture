@@ -10,7 +10,6 @@ using MediatR;
 
 namespace Application.Products.Commands;
 
-[ApplicationAuthorize(Policy = nameof(ProductsAdminPolicy))]
 public record DeleteProductCommand(ProductId Id) : IRequest<Result>
 {
     internal sealed class Handler : IRequestHandler<DeleteProductCommand, Result>

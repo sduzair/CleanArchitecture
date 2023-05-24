@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 
+using Application.Common.Security.Policies;
 using Application.Customers.Commands;
 using Application.Customers.Queries;
 
@@ -14,7 +15,6 @@ using Presentation.Contracts.Customers;
 
 namespace Presentation.Customers;
 
-[Authorize]
 public sealed class CustomerController : ApiControllerBase
 {
     private readonly ApplicationAspNetCoreResultEndpointProfile _resultProfile;
@@ -25,6 +25,7 @@ public sealed class CustomerController : ApiControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = nameof(CustomerPolicy))]
     public async Task<IActionResult> CreateCustomer()
     {
         var userId = GetUserIdFromClaimsPrinciple();
@@ -37,6 +38,7 @@ public sealed class CustomerController : ApiControllerBase
     }
 
     [HttpGet]
+    [Authorize(Policy = nameof(CustomerPolicy))]
     public async Task<IActionResult> GetCustomer()
     {
         var userId = GetUserIdFromClaimsPrinciple();
@@ -46,6 +48,7 @@ public sealed class CustomerController : ApiControllerBase
     }
 
     [HttpDelete]
+    [Authorize(Policy = nameof(CustomerPolicy))]
     public async Task<IActionResult> DeleteCustomer()
     {
         var userId = GetUserIdFromClaimsPrinciple();

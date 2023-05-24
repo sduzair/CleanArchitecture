@@ -12,7 +12,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Customers.Queries;
 
-[ApplicationAuthorize(Policy = nameof(CustomerPolicy))]
 public record GetCustomerByApplicationUserIdQuery(Guid ApplicationUserId) : IRequest<Result<Customer>>
 {
     internal class Handler : IRequestHandler<GetCustomerByApplicationUserIdQuery, Result<Customer>>

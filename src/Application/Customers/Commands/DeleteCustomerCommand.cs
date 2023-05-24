@@ -12,7 +12,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Customers.Commands;
 
-//[ApplicationAuthorize(Policy = nameof(CustomerPolicy))]
 public record DeleteCustomerCommand(Guid ApplicationUserId) : IRequest<Result>
 {
     internal class Handler : IRequestHandler<DeleteCustomerCommand, Result>

@@ -7,8 +7,6 @@ using Domain.Carts.ValueObjects;
 
 using FluentResults;
 
-using FluentValidation;
-
 using MediatR;
 
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +18,6 @@ namespace Application.Carts.Commands;
 /// </summary>
 /// <param name="CartId"></param>
 /// <param name="CartItem"></param>
-[ApplicationAuthorize(Policy = nameof(CartPolicy))]
 public record AddItemOrUpdateQuantityCommand(CartId CartId, CartItem CartItem) : IRequest<Result>
 {
     internal sealed class Handler : IRequestHandler<AddItemOrUpdateQuantityCommand, Result>

@@ -11,7 +11,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Products.Queries;
 
-[ApplicationAuthorize(Policy = nameof(ProductsViewPolicy))]
 public record class GetProductsQuery : IRequest<Result<IEnumerable<Product>>>
 {
     internal sealed class Handler : IRequestHandler<GetProductsQuery, Result<IEnumerable<Product>>>

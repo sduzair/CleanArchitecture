@@ -4,5 +4,5 @@ namespace Application.Common.Security.Policies;
 
 public static class CartPolicy
 {
-    public static readonly IReadOnlyList<string> Roles = new List<string>() { nameof(Customer) };
+    public static readonly IReadOnlyList<string> Roles = new List<string>() { nameof(Visitor), nameof(Customer) };
 }

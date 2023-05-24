@@ -16,7 +16,6 @@ namespace Application.Customers.Queries;
 /// This query is used to get a customer by their application user id.
 /// </summary>
 /// <param name="ApplicaitonUserId">This the foreign key to the Users table</param>
-[ApplicationAuthorize(Policy = nameof(CustomerPolicy))]
 public record GetCustomerByApplicationUserIdIncludeCartQuery(Guid ApplicationUserId) : IRequest<Result<Customer>>
 {
     internal sealed class Handler : IRequestHandler<GetCustomerByApplicationUserIdIncludeCartQuery, Result<Customer>>

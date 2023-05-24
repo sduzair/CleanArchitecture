@@ -1,13 +1,19 @@
 ﻿using Application;
 using Application.Auth;
 using Application.Common.Security.Policies;
+using Application.Common.Security.Schemes;
+using Application.Common.Security.Schemes.Application;
+using Application.Common.Security.Schemes.Visitor;
 using Application.UserManager;
 
 using Infrastructure.Common;
 using Infrastructure.Identity;
 using Infrastructure.Utilities;
 
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -27,27 +33,28 @@ public static class DependencyInjection
         });
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
 
-        services.AddIdentity<ApplicationUser, ApplicationRole>(o =>
-        {
-            if (env.IsDevelopment())
-            {
-                o.Password.RequireNonAlphanumeric = false;
-                o.Password.RequiredLength = 0;
-                o.Password.RequireUppercase = false;
-                o.Password.RequireLowercase = false;
-                o.Password.RequireDigit = false;
-            }
-        })
-            .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddUserStore<ApplicationUserStore>()
-            .AddUserManager<ApplicationUserManager>()
-            .AddRoles<ApplicationRole>()
-            .AddRoleManager<ApplicationRoleManager>()
-            .AddDefaultTokenProviders();
+        services.AddIdentityAndCustomAuthenticationScheme(env);
 
-        //validates security stamp and replaces principle with updated claims every 5 min
-        services.Configure<SecurityStampValidatorOptions>(o => o.ValidationInterval = env.IsDevelopment() ? TimeSpan.FromSeconds(1) : TimeSpan.FromMinutes(5));
+        services.AddAuthorizationAndPolicies();
 
+        //Application services
+        services.AddScoped<Application.Common.Interfaces.ITimeProvider, UtcClock>();
+
+        services.AddTransient<IEmailSender, MessageSender>();
+        services.AddTransient<ISmsSender, MessageSender>();
+
+        services.AddScoped<IApplicationAuthenticationService, ApplicationAuthenticationService>();
+        services.AddScoped<IApplicationAuthorizationService, ApplicationAuthorizationService>();
+        services.AddScoped<IApplicationUserService, ApplicationUserService>();
+
+        services.AddDistributedMemoryCache();
+        services.AddSession(o => o.IdleTimeout = TimeSpan.FromMinutes(30));
+
+        return services;
+    }
+
+    private static void AddAuthorizationAndPolicies(this IServiceCollection services)
+    {
         services.AddAuthorization(o =>
         {
             o.AddPolicy(nameof(ProductsAdminPolicy), p =>
@@ -75,23 +82,50 @@ public static class DependencyInjection
                 p.RequireAuthenticatedUser();
                 p.RequireRole(CustomerPolicy.Roles);
             });
+            o.AddPolicy(nameof(ApplicationUserManagementPolicy), p =>
+            {
+                p.RequireAuthenticatedUser();
+                p.RequireRole(ApplicationUserManagementPolicy.Roles);
+            });
+        });
+    }
+
+    private static void AddIdentityAndCustomAuthenticationScheme(this IServiceCollection services, IWebHostEnvironment env)
+    {
+        services.AddIdentity<ApplicationUser, ApplicationRole>(o =>
+        {
+            if (env.IsDevelopment())
+            {
+                o.Password.RequireNonAlphanumeric = false;
+                o.Password.RequiredLength = 0;
+                o.Password.RequireUppercase = false;
+                o.Password.RequireLowercase = false;
+                o.Password.RequireDigit = false;
+            }
+        })
+        .AddEntityFrameworkStores<ApplicationDbContext>()
+        .AddUserStore<ApplicationUserStore>()
+        .AddUserManager<ApplicationUserManager>()
+        .AddRoles<ApplicationRole>()
+        .AddRoleManager<ApplicationRoleManager>()
+        .AddDefaultTokenProviders();
+
+        services.AddAuthentication()
+        .AddApplicationCookie<CustomAuthenticationHandler>(CustomAuthenticationDefaults.AuthenticationScheme, o =>
+        {
+            //o.LoginPath = new PathString("/Account/Login");
+            o.Events = new CookieAuthenticationEvents
+            {
+                OnValidatePrincipal = SecurityStampValidator.ValidatePrincipalAsync
+            };
         });
 
-        //services.ConfigureApplicationCookie(co => co.LoginPath = "/Identity/Account/Login");
+        services.ConfigureApplicationCookie(co =>
+        {
+            co.ForwardDefault = CustomAuthenticationDefaults.AuthenticationScheme;
+        });
 
-        //Application services
-        services.AddScoped<Application.Common.Interfaces.ITimeProvider, UtcClock>();
-
-        services.AddTransient<IEmailSender, MessageSender>();
-        services.AddTransient<ISmsSender, MessageSender>();
-
-        services.AddScoped<IApplicationAuthenticationService, ApplicationAuthenticationService>();
-        services.AddScoped<IApplicationAuthorizationService, ApplicationAuthorizationService>();
-        services.AddScoped<IApplicationUserService, ApplicationUserService>();
-
-        services.AddDistributedMemoryCache();
-        services.AddSession(o => o.IdleTimeout = TimeSpan.FromMinutes(30));
-
-        return services;
+        //validates security stamp and replaces principle with updated claims every 5 min
+        services.Configure<SecurityStampValidatorOptions>(o => o.ValidationInterval = env.IsDevelopment() ? TimeSpan.FromSeconds(1) : TimeSpan.FromMinutes(5));
     }
 }

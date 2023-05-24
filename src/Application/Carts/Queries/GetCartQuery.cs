@@ -13,7 +13,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Carts.Queries;
 
-[ApplicationAuthorize(Policy = nameof(CartPolicy))]
 public record GetCartQuery(CartId CartId) : IRequest<Result<Cart>>
 {
     internal sealed class Handler : IRequestHandler<GetCartQuery, Result<Cart>>

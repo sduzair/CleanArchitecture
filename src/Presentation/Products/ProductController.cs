@@ -1,4 +1,5 @@
-﻿using Application.Products.Commands;
+﻿using Application.Common.Security.Policies;
+using Application.Products.Commands;
 using Application.Products.Queries;
 
 using Domain.Products.ValueObjects;
@@ -14,7 +15,6 @@ using Presentation.Contracts.Products;
 
 namespace Presentation.Products;
 
-[Authorize]
 public sealed class ProductController : ApiControllerBase
 {
     private readonly ApplicationAspNetCoreResultEndpointProfile _resultProfile;
@@ -25,6 +25,7 @@ public sealed class ProductController : ApiControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = nameof(ProductsManagementPolicy))]
     public async Task<IActionResult> CreateProduct(CreateProductCommand productDto)
     {
         var result = await Mediator.Send(productDto);
@@ -36,6 +37,7 @@ public sealed class ProductController : ApiControllerBase
     }
 
     [HttpGet]
+    [Authorize(Policy = nameof(ProductsViewPolicy))]
     public async Task<IActionResult> GetProducts()
     {
         return await Mediator.Send(new GetProductsQuery())
@@ -44,6 +46,7 @@ public sealed class ProductController : ApiControllerBase
     }
 
     [HttpGet]
+    [Authorize(Policy = nameof(ProductsViewPolicy))]
     public async Task<IActionResult> GetProductById(Guid id)
     {
         return await Mediator.Send(new GetProductByIdQuery(ProductId.From(id)))
@@ -52,6 +55,7 @@ public sealed class ProductController : ApiControllerBase
     }
 
     [HttpPut]
+    [Authorize(Policy = nameof(ProductsManagementPolicy))]
     public async Task<IActionResult> UpdateProduct(Guid id, ProductDto productDto)
     {
         if (id != productDto.Id)
@@ -65,6 +69,7 @@ public sealed class ProductController : ApiControllerBase
     }
 
     [HttpDelete]
+    [Authorize(Policy = nameof(ProductsAdminPolicy))]
     public async Task<IActionResult> DeleteProduct(Guid id)
     {
         return await Mediator.Send(new DeleteProductCommand(ProductId.From(id)))

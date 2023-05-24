@@ -11,7 +11,6 @@ using MediatR;
 
 namespace Application.Products.Queries;
 
-[ApplicationAuthorize(Policy = nameof(ProductsViewPolicy))]
 public record GetProductByIdQuery(ProductId Id) : IRequest<Result<Product>>
 {
     internal sealed class Handler : IRequestHandler<GetProductByIdQuery, Result<Product>>

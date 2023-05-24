@@ -1,4 +1,5 @@
-﻿using Application.UserManager;
+﻿using Application.Common.Security.Policies;
+using Application.UserManager;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -8,7 +9,7 @@ using Presentation.Common;
 
 namespace Presentation.UserManager;
 
-[Authorize]
+[Authorize(Policy = nameof(ApplicationUserManagementPolicy))]
 public sealed class UserManagerController : ApiControllerBase
 {
     private readonly IApplicationUserService _applicationUserService;
@@ -19,7 +20,6 @@ public sealed class UserManagerController : ApiControllerBase
     }
 
     [HttpPost]
-    [AllowAnonymous]
     public async Task<IActionResult> DeleteUserByEmail(string email)
     {
         var result = await _applicationUserService.DeleteUserAsync(email);
@@ -31,7 +31,6 @@ public sealed class UserManagerController : ApiControllerBase
     }
 
     [HttpPost]
-    [AllowAnonymous]
     public async Task<IActionResult> RemoveUserFromRole(string email, string roleName)
     {
         var result = await _applicationUserService.RemoveUserFromRoleAsync(email, roleName);
@@ -43,7 +42,6 @@ public sealed class UserManagerController : ApiControllerBase
     }
 
     [HttpPost]
-    [AllowAnonymous]
     public async Task<IActionResult> AddUserToRole(string email, string roleName)
     {
         var result = await _applicationUserService.AddUserToRoleAsync(email, roleName);
@@ -55,7 +53,6 @@ public sealed class UserManagerController : ApiControllerBase
     }
 
     [HttpGet]
-    [AllowAnonymous]
     public async Task<IActionResult> GetRolesForUser(string email)
     {
         (IdentityResult result, IReadOnlyList<string>? roles) = await _applicationUserService.GetRolesForUserAsync(email);
@@ -69,7 +66,6 @@ public sealed class UserManagerController : ApiControllerBase
     }
 
     [HttpGet]
-    [AllowAnonymous]
     public async Task<IActionResult> GetUsersInRole(string roleName)
     {
         var users = await _applicationUserService.GetUsersInRoleAsync(roleName);

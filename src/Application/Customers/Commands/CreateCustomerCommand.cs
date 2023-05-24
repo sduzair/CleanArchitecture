@@ -10,7 +10,6 @@ using MediatR;
 
 namespace Application.Customers.Commands;
 
-[ApplicationAuthorize(Policy = nameof(CustomerPolicy))]
 public record CreateCustomerCommand(Guid ApplicationUserId) : IRequest<Result<CustomerId>>
 {
     internal class Handler : IRequestHandler<CreateCustomerCommand, Result<CustomerId>>

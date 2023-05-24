@@ -19,7 +19,6 @@ namespace Application.Carts.Commands;
 /// </summary>
 /// <param name="CustomerId"></param>
 /// <param name="CartItems"></param>
-[ApplicationAuthorize(Policy = nameof(CartPolicy))]
 public record AddItemsToCartCommand(CartId CustomerId, IReadOnlyCollection<CartItem> CartItems) : IRequest<Result>
 {
     internal class Handler : IRequestHandler<AddItemsToCartCommand, Result>

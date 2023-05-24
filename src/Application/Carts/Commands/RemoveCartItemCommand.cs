@@ -13,7 +13,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Carts.Commands;
 
-[ApplicationAuthorize(Policy = nameof(CartPolicy))]
 public record RemoveCartItemCommand(CartId CartId, CartItem CartItem) : IRequest<Result>
 {
     internal sealed class Handler : IRequestHandler<RemoveCartItemCommand, Result>

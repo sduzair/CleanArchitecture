@@ -11,7 +11,6 @@ using MediatR;
 
 namespace Application.Carts.Commands;
 
-[ApplicationAuthorize(Policy = nameof(CartPolicy))]
 public record CreateCartCommand(CustomerId CustomerId) : IRequest<Result<CartId>>
 {
     internal class Handler : IRequestHandler<CreateCartCommand, Result<CartId>>

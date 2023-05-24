@@ -10,7 +10,6 @@ using MediatR;
 
 namespace Application.Products.Commands;
 
-[ApplicationAuthorize(Policy = nameof(ProductsManagementPolicy))]
 public record UpdateProductCommand(ProductId Id, string Name, string Description, decimal UnitPrice) : IRequest<Result>
 {
     internal sealed class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand, Result>
