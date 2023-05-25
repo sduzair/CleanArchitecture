@@ -65,7 +65,9 @@ internal class ApplicationUserService : IApplicationUserService
         {
             return (IdentityResult.Failed(_errorDescriber.DefaultError()), null);
         }
-        return (IdentityResult.Success, (await _userManager.GetRolesAsync(user)).AsReadOnly());
+
+        var roles = await _userManager.GetRolesAsync(user);
+        return (IdentityResult.Success, roles.AsReadOnly());
     }
 
     public async Task<List<string>> GetUsersInRoleAsync(string roleName)

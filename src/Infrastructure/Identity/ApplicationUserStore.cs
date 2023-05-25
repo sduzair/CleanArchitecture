@@ -37,4 +37,14 @@ internal class ApplicationUserStore : UserStore<ApplicationUser, ApplicationRole
             .ThenInclude(r => r.ApplicationRole)
             .FirstOrDefaultAsync(u => u.Id == Guid.Parse(userId), cancellationToken);
     }
+
+    public override Task<ApplicationUser?> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ThrowIfDisposed();
+
+        return Users.Include(u => u.ApplicationUserRoles)
+            .ThenInclude(r => r.ApplicationRole)
+            .SingleOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail, cancellationToken);
+    }
 }
