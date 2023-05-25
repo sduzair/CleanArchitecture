@@ -1,8 +1,9 @@
 ﻿using Application;
 using Application.Auth;
 using Application.Common.Security.Policies;
+using Application.Common.Security.Requirements;
 using Application.Common.Security.Schemes;
-using Application.Common.Security.Schemes.Visitor;
+using Application.Common.Security.Schemes.Custom;
 using Application.UserManager;
 
 using Infrastructure.Common;
@@ -32,7 +33,7 @@ public static class DependencyInjection
 
         services.AddIdentityAndCustomAuthenticationScheme(env);
 
-        services.AddAuthorizationAndPolicies();
+        services.AddAuthorizationPolicies();
 
         //Application services
         services.AddScoped<Application.Common.Interfaces.ITimeProvider, UtcClock>();
@@ -50,7 +51,7 @@ public static class DependencyInjection
         return services;
     }
 
-    private static void AddAuthorizationAndPolicies(this IServiceCollection services)
+    private static void AddAuthorizationPolicies(this IServiceCollection services)
     {
         services.AddAuthorization(o =>
         {
@@ -84,6 +85,10 @@ public static class DependencyInjection
                 p.RequireAuthenticatedUser();
                 p.RequireRole(ApplicationUserManagementPolicy.Roles);
             });
+            o.AddPolicy(nameof(EmailConfirmationPolicy), policy =>
+            {
+                policy.Requirements.Add(new EmailConfirmationAuthorizationRequirement());
+            });
         });
     }
 
@@ -110,7 +115,6 @@ public static class DependencyInjection
         services.AddAuthentication()
         .AddApplicationCookie<CustomAuthenticationHandler>(CustomAuthenticationDefaults.AuthenticationScheme, o =>
         {
-            //o.LoginPath = new PathString("/Account/Login");
             o.Events = new CookieAuthenticationEvents
             {
                 OnValidatePrincipal = SecurityStampValidator.ValidatePrincipalAsync
@@ -122,7 +126,7 @@ public static class DependencyInjection
             co.ForwardDefault = CustomAuthenticationDefaults.AuthenticationScheme;
         });
 
-        //validates security stamp and replaces principle with updated claims every 5 min
+        //validates security stamp and replaces user principle with updated claims every 5 min
         services.Configure<SecurityStampValidatorOptions>(o => o.ValidationInterval = env.IsDevelopment() ? TimeSpan.FromSeconds(1) : TimeSpan.FromMinutes(5));
     }
 }

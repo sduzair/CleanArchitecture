@@ -2,6 +2,8 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
 
+using Application.Common.Security.Roles;
+
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
@@ -9,7 +11,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Application.Common.Security.Schemes.Visitor;
+namespace Application.Common.Security.Schemes.Custom;
 
 /// <summary>
 /// Unauthorized requests will be signed in as visitor.
@@ -37,6 +39,7 @@ public class CustomAuthenticationHandler : CookieAuthenticationHandler
         {
             new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()),
             new Claim(ClaimTypes.Name, nameof(Visitor)),
+            new Claim(ClaimTypes.Email, nameof(Visitor)),
             new Claim(ClaimTypes.Role, nameof(Visitor))
         };
 

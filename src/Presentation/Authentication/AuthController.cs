@@ -1,6 +1,8 @@
 ﻿using System.Security.Claims;
 
 using Application.Auth;
+using Application.Common.Security.Policies;
+using Application.Common.Security.Requirements;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -54,6 +56,7 @@ public sealed class AuthController : ApiControllerBase
     }
 
     [HttpGet()]
+    [Authorize(Policy = nameof(EmailConfirmationPolicy))]
     public async Task<IActionResult> ConfirmEmail(string token)
     {
         if (string.IsNullOrEmpty(token))
