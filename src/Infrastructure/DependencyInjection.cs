@@ -85,9 +85,9 @@ public static class DependencyInjection
                 p.RequireAuthenticatedUser();
                 p.RequireRole(ApplicationUserManagementPolicy.Roles);
             });
-            o.AddPolicy(nameof(EmailConfirmationPolicy), policy =>
+            o.AddPolicy(nameof(LogoutPolicy), policy =>
             {
-                policy.Requirements.Add(new EmailConfirmationAuthorizationRequirement());
+                policy.Requirements.Add(new LogoutAuthorizationRequirement());
             });
         });
     }

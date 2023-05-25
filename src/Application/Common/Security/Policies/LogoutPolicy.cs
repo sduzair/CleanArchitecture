@@ -1,2 +1,2 @@
 ﻿namespace Application.Common.Security.Policies;
-public static class EmailConfirmationPolicy { }
+public static class LogoutPolicy { }

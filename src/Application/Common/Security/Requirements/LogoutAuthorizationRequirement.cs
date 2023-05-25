@@ -7,13 +7,13 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Application.Common.Security.Requirements;
 
-public class EmailConfirmationAuthorizationRequirement : AuthorizationHandler<EmailConfirmationAuthorizationRequirement>, IAuthorizationRequirement
+public class LogoutAuthorizationRequirement : AuthorizationHandler<LogoutAuthorizationRequirement>, IAuthorizationRequirement
 {
     public IReadOnlyList<string> Roles { get; init; }
 
     public string RequiredClaimType { get; init; }
 
-    public EmailConfirmationAuthorizationRequirement()
+    public LogoutAuthorizationRequirement()
     {
         Roles = GetRoleNames();
         RequiredClaimType = ClaimTypes.Email;
@@ -30,7 +30,7 @@ public class EmailConfirmationAuthorizationRequirement : AuthorizationHandler<Em
         return roleTypeNames.AsReadOnly();
     }
 
-    protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, EmailConfirmationAuthorizationRequirement requirement)
+    protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, LogoutAuthorizationRequirement requirement)
     {
         if (!context.User.HasClaim(MatchClaim))
         {
@@ -50,7 +50,7 @@ public class EmailConfirmationAuthorizationRequirement : AuthorizationHandler<Em
         }
     }
 
-    private static bool HasAnyRequiredRole(AuthorizationHandlerContext context, EmailConfirmationAuthorizationRequirement requirement)
+    private static bool HasAnyRequiredRole(AuthorizationHandlerContext context, LogoutAuthorizationRequirement requirement)
     {
         return requirement.Roles.Any(context.User.IsInRole) && !context.User.IsInRole(nameof(Visitor));
     }

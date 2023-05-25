@@ -28,22 +28,22 @@ internal class ApplicationAuthenticationService : IApplicationAuthenticationServ
 
         //creates and adds user to role in a transaction
         var result = await _userManager.CreateAndAddToRoleTransactionAsync(user, password, roleName);
-        //if (result.Succeeded)
-        //{
-        //    // Send email verification link to user's email
-        //    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        //    // Email sending logic
-        //    await _emailSender.SendEmailAsync(user.Email, "Confirm your email", $"Please confirm your account by clicking this link: {token}");
-        //}
+        if (result.Succeeded)
+        {
+            // Send email verification link to user's email
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            // Email sending logic
+            //await _emailSender.SendEmailAsync(user.Email, "Confirm your email", $"Please confirm your account by clicking this link: {token}");
+        }
         return (result, user.Id.ToString());
     }
 
-    public async Task<IdentityResult> ConfirmEmailAsync(string email, string token)
+    public async Task<IdentityResult> ConfirmEmailAsync(string userId, string token)
     {
-        var user = await _userManager.FindByEmailAsync(email);
+        var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
         {
-            return IdentityResult.Failed(_errorDescriber.DefaultError());
+            return IdentityResult.Failed(_errorDescriber.InvalidToken());
         }
         var result = await _userManager.ConfirmEmailAsync(user, token);
         return result;
@@ -51,10 +51,21 @@ internal class ApplicationAuthenticationService : IApplicationAuthenticationServ
 
     public async Task<SignInResult> LoginAsync(string email, string password, bool isPersistent = true, bool lockoutOnFailure = false)
     {
+        var user = await _userManager.FindByEmailAsync(email);
+
+        if (user == null)
+        {
+            return SignInResult.Failed;
+        }
+
+        if (!await _userManager.IsEmailConfirmedAsync(user))
+        {
+            return SignInResult.NotAllowed;
+        }
 
         SignInResult result = await _signInManager.PasswordSignInAsync(email, password, isPersistent, lockoutOnFailure: false);
-        return result;
 
+        return result;
     }
 
     public async Task LogoutAsync()
