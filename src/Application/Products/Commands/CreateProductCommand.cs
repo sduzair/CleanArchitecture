@@ -7,15 +7,17 @@ using FluentResults;
 
 using MediatR;
 
+using Persistence;
+
 namespace Application.Products.Commands;
 
 public record CreateProductCommand(string Name, string Description, decimal UnitPrice, int Stock) : IRequest<Result<Guid>>
 {
     internal sealed class Handler : IRequestHandler<CreateProductCommand, Result<Guid>>
     {
-        private readonly IApplicationDbContext _applicationDbContext;
+        private readonly AppDbContext _applicationDbContext;
 
-        public Handler(IApplicationDbContext context)
+        public Handler(AppDbContext context)
         {
             _applicationDbContext = context;
         }

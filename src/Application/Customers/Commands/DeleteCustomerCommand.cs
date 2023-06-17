@@ -10,15 +10,17 @@ using MediatR;
 
 using Microsoft.EntityFrameworkCore;
 
+using Persistence;
+
 namespace Application.Customers.Commands;
 
 public record DeleteCustomerCommand(Guid ApplicationUserId) : IRequest<Result>
 {
-    internal class Handler : IRequestHandler<DeleteCustomerCommand, Result>
+    internal sealed class Handler : IRequestHandler<DeleteCustomerCommand, Result>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly AppDbContext _context;
 
-        public Handler(IApplicationDbContext context)
+        public Handler(AppDbContext context)
         {
             _context = context;
         }

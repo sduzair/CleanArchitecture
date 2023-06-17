@@ -10,6 +10,8 @@ using MediatR;
 
 using Microsoft.EntityFrameworkCore;
 
+using Persistence;
+
 namespace Application.Customers.Queries;
 
 /// <summary>
@@ -20,9 +22,9 @@ public record GetCustomerByApplicationUserIdIncludeCartQuery(Guid ApplicationUse
 {
     internal sealed class Handler : IRequestHandler<GetCustomerByApplicationUserIdIncludeCartQuery, Result<Customer>>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly AppDbContext _context;
 
-        public Handler(IApplicationDbContext context)
+        public Handler(AppDbContext context)
         {
             _context = context;
         }

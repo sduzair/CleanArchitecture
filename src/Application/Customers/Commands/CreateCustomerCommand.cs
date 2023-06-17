@@ -8,14 +8,16 @@ using FluentResults;
 
 using MediatR;
 
+using Persistence;
+
 namespace Application.Customers.Commands;
 
 public record CreateCustomerCommand(Guid ApplicationUserId) : IRequest<Result<CustomerId>>
 {
     internal class Handler : IRequestHandler<CreateCustomerCommand, Result<CustomerId>>
     {
-        private readonly IApplicationDbContext _context;
-        public Handler(IApplicationDbContext context)
+        private readonly AppDbContext _context;
+        public Handler(AppDbContext context)
         {
             _context = context;
         }

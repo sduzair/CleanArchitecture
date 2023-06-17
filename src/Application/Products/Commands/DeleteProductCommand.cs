@@ -8,15 +8,17 @@ using FluentResults;
 
 using MediatR;
 
+using Persistence;
+
 namespace Application.Products.Commands;
 
 public record DeleteProductCommand(ProductId Id) : IRequest<Result>
 {
     internal sealed class Handler : IRequestHandler<DeleteProductCommand, Result>
     {
-        private readonly IApplicationDbContext _applicationDbContext;
+        private readonly AppDbContext _applicationDbContext;
 
-        public Handler(IApplicationDbContext applicationDbContext)
+        public Handler(AppDbContext applicationDbContext)
         {
             _applicationDbContext = applicationDbContext;
         }

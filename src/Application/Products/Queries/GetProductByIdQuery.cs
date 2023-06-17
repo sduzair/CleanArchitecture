@@ -9,14 +9,16 @@ using FluentResults;
 
 using MediatR;
 
+using Persistence;
+
 namespace Application.Products.Queries;
 
 public record GetProductByIdQuery(ProductId Id) : IRequest<Result<Product>>
 {
     internal sealed class Handler : IRequestHandler<GetProductByIdQuery, Result<Product>>
     {
-        private readonly IApplicationDbContext _applicationDbContext;
-        public Handler(IApplicationDbContext context)
+        private readonly AppDbContext _applicationDbContext;
+        public Handler(AppDbContext context)
         {
             _applicationDbContext = context;
         }

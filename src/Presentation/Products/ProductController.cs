@@ -25,7 +25,7 @@ public sealed class ProductController : ApiControllerBase
     }
 
     [HttpPost]
-    [Authorize(Policy = nameof(ProductsManagementPolicy))]
+    [Authorize(Policy = nameof(ProductManagementPolicy))]
     public async Task<IActionResult> CreateProduct(CreateProductCommand productDto)
     {
         var result = await Mediator.Send(productDto);
@@ -37,7 +37,7 @@ public sealed class ProductController : ApiControllerBase
     }
 
     [HttpGet]
-    [Authorize(Policy = nameof(ProductsViewPolicy))]
+    [Authorize(Policy = nameof(ProductViewPolicy))]
     public async Task<IActionResult> GetProducts()
     {
         return await Mediator.Send(new GetProductsQuery())
@@ -46,7 +46,7 @@ public sealed class ProductController : ApiControllerBase
     }
 
     [HttpGet]
-    [Authorize(Policy = nameof(ProductsViewPolicy))]
+    [Authorize(Policy = nameof(ProductViewPolicy))]
     public async Task<IActionResult> GetProductById(Guid id)
     {
         return await Mediator.Send(new GetProductByIdQuery(ProductId.From(id)))
@@ -55,7 +55,7 @@ public sealed class ProductController : ApiControllerBase
     }
 
     [HttpPut]
-    [Authorize(Policy = nameof(ProductsManagementPolicy))]
+    [Authorize(Policy = nameof(ProductManagementPolicy))]
     public async Task<IActionResult> UpdateProduct(Guid id, ProductDto productDto)
     {
         if (id != productDto.Id)
@@ -69,7 +69,7 @@ public sealed class ProductController : ApiControllerBase
     }
 
     [HttpDelete]
-    [Authorize(Policy = nameof(ProductsAdminPolicy))]
+    [Authorize(Policy = nameof(ProductAdminPolicy))]
     public async Task<IActionResult> DeleteProduct(Guid id)
     {
         return await Mediator.Send(new DeleteProductCommand(ProductId.From(id)))

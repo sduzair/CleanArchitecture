@@ -11,15 +11,17 @@ using MediatR;
 
 using Microsoft.EntityFrameworkCore;
 
+using Persistence;
+
 namespace Application.Carts.Commands;
 
 public record RemoveCartItemCommand(CartId CartId, CartItem CartItem) : IRequest<Result>
 {
     internal sealed class Handler : IRequestHandler<RemoveCartItemCommand, Result>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly AppDbContext _context;
 
-        public Handler(IApplicationDbContext context)
+        public Handler(AppDbContext context)
         {
             _context = context;
         }

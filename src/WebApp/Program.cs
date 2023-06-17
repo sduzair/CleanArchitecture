@@ -3,13 +3,15 @@ using Application;
 using Infrastructure;
 
 using Presentation;
+using Persistence;
 
 //This is the entry point of the application and acts as the Composition Root
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 {
+    builder.Services.AddPersistence(builder.Environment);
     builder.Services.AddInfrastructure(builder.Environment);
-    builder.Services.AddApplication();
+    builder.Services.AddApplication(builder.Environment);
     builder.Services.AddPresentation();
 }
 

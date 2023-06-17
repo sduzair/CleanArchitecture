@@ -1,8 +1,5 @@
-﻿using System.Security.Claims;
-
-using Application.Auth;
-using Application.Common.Security.Policies;
-using Application.Common.Security.Requirements;
+﻿using Application.Common.Security.Policies;
+using Application.Identity;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -16,13 +13,13 @@ namespace Presentation.Authentication;
 [Authorize]
 public sealed class AuthController : ApiControllerBase
 {
-    private readonly IApplicationAuthenticationService _authService;
+    private readonly AuthService _authService;
     private static class SessionKeys
     {
         public const string UserId = "UserId";
     }
 
-    public AuthController(IApplicationAuthenticationService authService)
+    public AuthController(AuthService authService)
     {
         _authService = authService;
     }

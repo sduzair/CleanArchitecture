@@ -8,14 +8,16 @@ using FluentResults;
 
 using MediatR;
 
+using Persistence;
+
 namespace Application.Products.Commands;
 
 public record UpdateProductCommand(ProductId Id, string Name, string Description, decimal UnitPrice) : IRequest<Result>
 {
     internal sealed class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand, Result>
     {
-        private readonly IApplicationDbContext _applicationDbContext;
-        public UpdateProductCommandHandler(IApplicationDbContext context)
+        private readonly AppDbContext _applicationDbContext;
+        public UpdateProductCommandHandler(AppDbContext context)
         {
             _applicationDbContext = context;
         }

@@ -4,9 +4,14 @@ using System.Security.Claims;
 using Application.Common.Security.Roles;
 
 using Microsoft.AspNetCore.Authorization;
+using Application.Common.Security.Policies;
+using Persistence.Identity;
 
 namespace Application.Common.Security.Requirements;
 
+/// <summary>
+/// Authorization requirement for <see cref="LogoutPolicy"/>
+/// </summary>
 public class LogoutAuthorizationRequirement : AuthorizationHandler<LogoutAuthorizationRequirement>, IAuthorizationRequirement
 {
     public IReadOnlyList<string> Roles { get; init; }

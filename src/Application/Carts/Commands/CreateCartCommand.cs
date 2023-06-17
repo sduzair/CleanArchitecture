@@ -9,14 +9,16 @@ using FluentResults;
 
 using MediatR;
 
+using Persistence;
+
 namespace Application.Carts.Commands;
 
 public record CreateCartCommand(CustomerId CustomerId) : IRequest<Result<CartId>>
 {
-    internal class Handler : IRequestHandler<CreateCartCommand, Result<CartId>>
+    internal sealed class Handler : IRequestHandler<CreateCartCommand, Result<CartId>>
     {
-        private readonly IApplicationDbContext _context;
-        public Handler(IApplicationDbContext context)
+        private readonly AppDbContext _context;
+        public Handler(AppDbContext context)
         {
             _context = context;
         }

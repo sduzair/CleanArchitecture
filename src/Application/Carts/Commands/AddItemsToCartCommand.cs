@@ -12,6 +12,8 @@ using MediatR;
 
 using Microsoft.EntityFrameworkCore;
 
+using Persistence;
+
 namespace Application.Carts.Commands;
 
 /// <summary>
@@ -23,9 +25,9 @@ public record AddItemsToCartCommand(CartId CustomerId, IReadOnlyCollection<CartI
 {
     internal class Handler : IRequestHandler<AddItemsToCartCommand, Result>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly AppDbContext _context;
 
-        public Handler(IApplicationDbContext context)
+        public Handler(AppDbContext context)
         {
             _context = context;
         }

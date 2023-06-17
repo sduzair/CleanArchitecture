@@ -1,4 +1,6 @@
-﻿namespace Application.Common.Security.Roles;
+﻿using Persistence.Identity;
+
+namespace Application.Common.Security.Roles;
 
 //TODO - shift roles to application layer
 

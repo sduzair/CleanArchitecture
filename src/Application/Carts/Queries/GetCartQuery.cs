@@ -11,15 +11,17 @@ using MediatR;
 
 using Microsoft.EntityFrameworkCore;
 
+using Persistence;
+
 namespace Application.Carts.Queries;
 
 public record GetCartQuery(CartId CartId) : IRequest<Result<Cart>>
 {
     internal sealed class Handler : IRequestHandler<GetCartQuery, Result<Cart>>
     {
-        private readonly IApplicationDbContext _context;
+        private readonly AppDbContext _context;
 
-        public Handler(IApplicationDbContext context)
+        public Handler(AppDbContext context)
         {
             _context = context;
         }
