@@ -60,10 +60,10 @@ public class AuthService
             return SignInResult.Failed;
         }
 
-        if (!await _userManager.IsEmailConfirmedAsync(user))
-        {
-            return SignInResult.NotAllowed;
-        }
+        //if (!await _userManager.IsEmailConfirmedAsync(user))
+        //{
+        //    return SignInResult.NotAllowed;
+        //}
 
         SignInResult result = await _signInManager.PasswordSignInAsync(email, password, isPersistent, lockoutOnFailure: false);
 

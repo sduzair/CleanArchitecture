@@ -1,4 +1,5 @@
-﻿using Application.Common.Security;
+﻿using Application.Carts.Errors;
+using Application.Common.Security;
 using Application.Common.Security.Policies;
 
 using Domain.Carts.Entities;
@@ -38,7 +39,12 @@ public record RemoveCartItemCommand(CartId CartId, CartItem CartItem) : IRequest
                 return Result.Fail(new CartNotFoundError(cartId));
             }
 
-            cart.RemoveItem(cartItem);
+            var found = cart.RemoveItem(cartItem);
+
+            if (!found)
+            {
+                return Result.Fail(new CartItemNotFoundError(cartItem));
+            }
 
             await _context.SaveChangesAsync(cancellationToken);
 

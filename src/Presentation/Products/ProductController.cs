@@ -11,15 +11,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using Presentation.Common;
-using Presentation.Contracts.Products;
 
 namespace Presentation.Products;
 
 public sealed class ProductController : ApiControllerBase
 {
-    private readonly ApplicationAspNetCoreResultEndpointProfile _resultProfile;
+    private readonly CustomAspNetCoreResultEndpointProfile _resultProfile;
 
-    public ProductController(ApplicationAspNetCoreResultEndpointProfile resultProfile)
+    public ProductController(CustomAspNetCoreResultEndpointProfile resultProfile)
     {
         _resultProfile = resultProfile;
     }

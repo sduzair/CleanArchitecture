@@ -1,11 +1,10 @@
 ﻿using System.Reflection;
 using System.Security.Claims;
 
-using Application.Common.Security.Roles;
-
 using Microsoft.AspNetCore.Authorization;
 using Application.Common.Security.Policies;
 using Persistence.Identity;
+using Persistence.Identity.Roles;
 
 namespace Application.Common.Security.Requirements;
 

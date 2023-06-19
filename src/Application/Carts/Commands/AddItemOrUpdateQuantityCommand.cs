@@ -1,8 +1,6 @@
-﻿using Application.Common.Security;
-using Application.Common.Security.Policies;
+﻿using Application.Carts.Errors;
 
 using Domain.Carts.Entities;
-using Domain.Carts.Errors;
 using Domain.Carts.ValueObjects;
 
 using FluentResults;
@@ -44,7 +42,7 @@ public record AddItemOrUpdateQuantityCommand(CartId CartId, CartItem CartItem) :
                 return Result.Fail(new CartNotFoundError(cartId));
             }
 
-            var result = cart.AddItemOrUpdateQuantity(request.CartItem);
+            var result = cart.AddItemOrUpdateQuantityAsync(cartItem);
 
             if (result.IsFailed)
             {

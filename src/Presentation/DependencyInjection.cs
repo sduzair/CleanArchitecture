@@ -1,14 +1,8 @@
-﻿using Application.Common.Interfaces;
-
-using FluentResults.Extensions.AspNetCore;
-
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 using Presentation.Common;
 using Presentation.Middleware;
-using Presentation.Services;
 
 namespace Presentation;
 public static class DependencyInjection
@@ -25,9 +19,7 @@ public static class DependencyInjection
 
         services.AddTransient<ContentNegotiationMiddleware>();
 
-        services.AddScoped<ApplicationAspNetCoreResultEndpointProfile>();
-
-        services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<CustomAspNetCoreResultEndpointProfile>();
 
         return services;
     }

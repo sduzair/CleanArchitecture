@@ -1,8 +1,6 @@
-﻿using Application.Common.Security;
-using Application.Common.Security.Policies;
+﻿using Application.Products.Errors;
 
 using Domain.Products;
-using Domain.Products.Errors;
 using Domain.Products.ValueObjects;
 
 using FluentResults;

@@ -1,4 +1,4 @@
-﻿using Application.Common.Security.Roles;
+﻿using Persistence.Identity.Roles;
 
 namespace Application.Common.Security.Policies;
 public static class CustomerPolicy

@@ -96,4 +96,9 @@ public abstract class ValueObject : IValueObject
     {
         return CompareTo(other as object);
     }
+
+    public override string ToString()
+    {
+        return $"{GetType().Name} [{string.Join(", ", GetEqualityComponents())}]";
+    }
 }

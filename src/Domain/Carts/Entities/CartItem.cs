@@ -52,32 +52,37 @@ public sealed class CartItem : ValueObject
     //    };
     //}
 
-    public Result UpdateQuantity(int quantity)
+    /// <summary>
+    /// Adds the <paramref name="quantityToAdd"/> to the current quantity.
+    /// </summary>
+    /// <param name="quantityToAdd"></param>
+    /// <returns></returns>
+    public Result UpdateQuantity(int quantityToAdd)
     {
         var result = new Result();
-        if(!MustNotBeZeroQuantity(Quantity, quantity))
+        if(!MustNotBeZeroTotalQuantity(Quantity, quantityToAdd))
         {
-            result.WithError(new MustNotBeZeroQuantityValidationError());
+            result.WithError(new MustNotBeZeroTotalQuantityValidationError());
         }
-        if (!MustHavePositiveQuantity(Quantity, quantity))
+        if (!MustHavePositiveTotalQuantity(Quantity, quantityToAdd))
         {
-            result.WithError(new MustHavePositiveTotalQuantityValidationError(Quantity + quantity));
+            result.WithError(new MustHavePositiveTotalQuantityValidationError());
         }
         if (result.IsFailed)
         {
             return result;
         }
 
-        Quantity += quantity;
+        Quantity += quantityToAdd;
         return result;
     }
 
-    public static bool MustNotBeZeroQuantity(int oldQuantity, int newQuantity)
+    public static bool MustNotBeZeroTotalQuantity(int oldQuantity, int newQuantity)
     {
         return oldQuantity + newQuantity != 0;
     }
 
-    public static bool MustHavePositiveQuantity(int oldQuantity, int newQuantity)
+    public static bool MustHavePositiveTotalQuantity(int oldQuantity, int newQuantity)
     {
         return oldQuantity + newQuantity > 0;
     }

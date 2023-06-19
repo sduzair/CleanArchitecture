@@ -2,14 +2,14 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
 
-using Application.Common.Security.Roles;
-
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
+using Persistence.Identity.Roles;
 
 namespace Application.Common.Security.Schemes.Custom;
 
@@ -55,10 +55,6 @@ public class CustomAuthenticationHandler : CookieAuthenticationHandler
 
     protected override Task HandleChallengeAsync(AuthenticationProperties properties)
     {
-        //return 401 response instead of redirecting to login page
-        //Response.StatusCode = 401;
-        //return Task.CompletedTask;
-
         //problem details error response 401 instead of redirecting to login page
         var problemDetails = _problemDetailsFactory.CreateProblemDetails(
             httpContext: Context,
@@ -75,10 +71,6 @@ public class CustomAuthenticationHandler : CookieAuthenticationHandler
 
     protected override Task HandleForbiddenAsync(AuthenticationProperties properties)
     {
-        //return 403 response instead of redirecting to access denied page
-        //Response.StatusCode = 403;
-        //return Task.CompletedTask;
-
         //problem details error response 403 instead of redirecting to access denied page
         var problemDetails = _problemDetailsFactory.CreateProblemDetails(
             httpContext: Context,

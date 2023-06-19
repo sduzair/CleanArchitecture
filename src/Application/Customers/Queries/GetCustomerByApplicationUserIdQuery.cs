@@ -1,8 +1,6 @@
-﻿using Application.Common.Security;
-using Application.Common.Security.Policies;
+﻿using Application.Customers.Errors;
 
 using Domain.Customers;
-using Domain.Customers.Errors;
 
 using FluentResults;
 

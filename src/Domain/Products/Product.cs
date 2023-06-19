@@ -1,4 +1,5 @@
-﻿using Domain.Common;
+﻿using Domain.Carts.Entities;
+using Domain.Common;
 using Domain.Products.ValueObjects;
 
 using FluentResults;

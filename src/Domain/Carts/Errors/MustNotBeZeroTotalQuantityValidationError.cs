@@ -1,19 +1,17 @@
-﻿using System.Collections.Generic;
-
-using Domain.Carts.Entities;
+﻿using Domain.Carts.Entities;
 using Domain.Common.ErrorTypes;
 
 using FluentResults;
 
 namespace Domain.Carts.Errors;
-public class MustHavePositiveTotalQuantityValidationError : Error, IValidationError
+
+public class MustNotBeZeroTotalQuantityValidationError : Error, IValidationError
 {
-    public MustHavePositiveTotalQuantityValidationError()
+    public MustNotBeZeroTotalQuantityValidationError()
     {
-        Message = $"Total quantity must be positive.";
+        Message = "Total quantity cannot be zero";
         Metadata.Add("Key", nameof(CartItem.Quantity));
     }
-
     public string Key
     {
         get

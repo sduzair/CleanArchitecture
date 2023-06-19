@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 using Presentation.Common;
-using Presentation.Contracts.Auth;
 
 namespace Presentation.Authentication;
 

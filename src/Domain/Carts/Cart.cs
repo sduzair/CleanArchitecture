@@ -3,6 +3,8 @@ using Domain.Carts.Errors;
 using Domain.Carts.ValueObjects;
 using Domain.Common;
 using Domain.Customers.ValueObjects;
+using Domain.Products;
+using Domain.Products.ValueObjects;
 
 using FluentResults;
 
@@ -37,47 +39,31 @@ public sealed class Cart : AggregateRoot<CartId>
         return new(CartId.Create(), customerId, items);
     }
 
-    public Result AddItemOrUpdateQuantity(CartItem cartItemToAddOrUpdate)
+    public Result AddItemOrUpdateQuantityAsync(CartItem cartItem)
     {
-        Result result = new();
-
-        if (!MustHavePositiveUnitPrice(cartItemToAddOrUpdate))
+        Result? result;
+        if (_items.TryGetValue(cartItem, out var item))
         {
-            result.WithError(new MustHavePositiveUnitPriceValidationError(cartItemToAddOrUpdate.UnitPrice));
-        }
-
-        Result? resultAddOrUpdate;
-        if (_items.TryGetValue(cartItemToAddOrUpdate, out var item))
-        {
-            resultAddOrUpdate = item.UpdateQuantity(cartItemToAddOrUpdate.Quantity);
+            result = item.UpdateQuantity(cartItem.Quantity);
         }
         else
         {
-            resultAddOrUpdate = AddItem(cartItemToAddOrUpdate);
+            result = AddItem(cartItem);
         }
 
-        if (resultAddOrUpdate.IsFailed)
-        {
-            result.WithErrors(resultAddOrUpdate.Errors);
-        }
         return result;
-    }
-
-    private static bool MustHavePositiveUnitPrice(CartItem item)
-    {
-        return item.UnitPrice > 0;
     }
 
     private Result AddItem(CartItem cartItemToAdd)
     {
         var result = new Result();
-        if (!CartItem.MustNotBeZeroQuantity(0, cartItemToAdd.Quantity))
+        if (!CartItem.MustNotBeZeroTotalQuantity(0, cartItemToAdd.Quantity))
         {
-            result.WithError(new MustNotBeZeroQuantityValidationError());
+            result.WithError(new MustNotBeZeroTotalQuantityValidationError());
         }
-        if (!CartItem.MustHavePositiveQuantity(0, cartItemToAdd.Quantity))
+        if (!CartItem.MustHavePositiveTotalQuantity(0, cartItemToAdd.Quantity))
         {
-            result.WithError(new MustHavePositiveTotalQuantityValidationError(0 +  cartItemToAdd.Quantity));
+            result.WithError(new MustHavePositiveTotalQuantityValidationError());
         }
         if (result.IsFailed)
         {
@@ -102,8 +88,8 @@ public sealed class Cart : AggregateRoot<CartId>
         return result;
     }
 
-    public void RemoveItem(CartItem cartItem)
+    public bool RemoveItem(CartItem cartItem)
     {
-        _items.Remove(cartItem);
+        return _items.Remove(cartItem);
     }
 }
