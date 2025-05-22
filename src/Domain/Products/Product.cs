@@ -25,12 +25,12 @@ public sealed class Product : AggregateRoot<ProductId>
         Stock = stock;
     }
 
-    public static Result<Product> Create(string name, string description, decimal price, int stock)
+    public static Result<Product> Create(ProductId id, string name, string description, decimal price, int stock)
     {
         //TODO: add validation
         return new Product
         (
-            id: ProductId.Create(),
+            id: id,
             name: name,
             description: description,
             price: price,

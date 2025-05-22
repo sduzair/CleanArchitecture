@@ -25,6 +25,7 @@ if (app.Environment.IsProduction())
 
 if (app.Environment.IsDevelopment())
 {
+    //app.ApplyMigrations();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
@@ -43,3 +44,5 @@ app.UsePresentation();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }

@@ -12,7 +12,7 @@ namespace Application.Products.Commands;
 
 public record DeleteProductCommand(ProductId Id) : IRequest<Result>
 {
-    internal sealed class Handler : IRequestHandler<DeleteProductCommand, Result>
+    public sealed class Handler : IRequestHandler<DeleteProductCommand, Result>
     {
         private readonly AppDbContext _applicationDbContext;
 

@@ -15,7 +15,7 @@ namespace Application.Carts.Queries;
 
 public record GetCartQuery(CartId CartId) : IRequest<Result<Cart>>
 {
-    internal sealed class Handler : IRequestHandler<GetCartQuery, Result<Cart>>
+    public sealed class Handler : IRequestHandler<GetCartQuery, Result<Cart>>
     {
         private readonly AppDbContext _context;
 

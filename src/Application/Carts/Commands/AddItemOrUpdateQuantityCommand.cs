@@ -20,7 +20,7 @@ namespace Application.Carts.Commands;
 /// <param name="CartItem"></param>
 public record AddItemOrUpdateQuantityCommand(CartId CartId, CartItem CartItem) : IRequest<Result>
 {
-    internal sealed class Handler : IRequestHandler<AddItemOrUpdateQuantityCommand, Result>
+    public sealed class Handler : IRequestHandler<AddItemOrUpdateQuantityCommand, Result>
     {
         private readonly AppDbContext _context;
 

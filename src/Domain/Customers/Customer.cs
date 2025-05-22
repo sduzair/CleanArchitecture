@@ -24,8 +24,13 @@ public class Customer : AggregateRoot<CustomerId>
     //ef core constructor to map entity
     private Customer() { }
 
-    public static Customer Create(Guid applicationUserId)
+    /// <summary>
+    /// Creates a new customer. 
+    /// </summary>
+    /// <param name="userId">The id of the application user that is associated with this customer.</param>
+    /// <returns></returns>
+    public static Customer Create(Guid userId)
     {
-        return new Customer() { Id = CustomerId.Create(), ApplicationUserId = applicationUserId };
+        return new Customer() { Id = CustomerId.Create(), ApplicationUserId = userId };
     }
 }

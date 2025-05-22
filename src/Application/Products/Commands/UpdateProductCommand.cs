@@ -12,10 +12,10 @@ namespace Application.Products.Commands;
 
 public record UpdateProductCommand(ProductId Id, string Name, string Description, decimal UnitPrice) : IRequest<Result>
 {
-    internal sealed class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand, Result>
+    public sealed class Handler : IRequestHandler<UpdateProductCommand, Result>
     {
         private readonly AppDbContext _applicationDbContext;
-        public UpdateProductCommandHandler(AppDbContext context)
+        public Handler(AppDbContext context)
         {
             _applicationDbContext = context;
         }

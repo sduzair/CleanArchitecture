@@ -1,7 +1,4 @@
-﻿using Application.Common.Security;
-using Application.Common.Security.Policies;
-
-using Domain.Carts;
+﻿using Domain.Carts;
 using Domain.Carts.ValueObjects;
 using Domain.Customers.ValueObjects;
 
@@ -15,7 +12,7 @@ namespace Application.Carts.Commands;
 
 public record CreateCartCommand(CustomerId CustomerId) : IRequest<Result<CartId>>
 {
-    internal sealed class Handler : IRequestHandler<CreateCartCommand, Result<CartId>>
+    public sealed class Handler : IRequestHandler<CreateCartCommand, Result<CartId>>
     {
         private readonly AppDbContext _context;
         public Handler(AppDbContext context)
